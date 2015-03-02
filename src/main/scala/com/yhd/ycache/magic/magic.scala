@@ -10,7 +10,7 @@ import org.apache.spark.SparkContext._
 /*
   Magic class implement the interface @MagicIntf.
  */
-class Magic(sc: SparkContext, filesOrPath: String)  extends java.io.Serializable with MagicIntf{
+class Magic(sc: SparkContext, filesOrPath: String)  extends Serializable with MagicIntf{
   /*
      0. init
     */
@@ -26,13 +26,14 @@ class Magic(sc: SparkContext, filesOrPath: String)  extends java.io.Serializable
   def POS_SRC  = 2
   def POS_TYPE = 3
 
+  private val sqlContext = new org.apache.spark.sql.SQLContext(sc)
   val hdRdd= sc.textFile(filesOrPath).flatMap(_.split("\n")).persist()
 
-  def string2Int(s: String):Int = {
-    try{
+  def string2Int(s: String, default: Int=0):Int = {
+    try {
       s.toInt
-    }catch{
-      case e: Exception => 0
+    } catch {
+      case e: Exception => default
     }
   }
 
@@ -83,7 +84,26 @@ class Magic(sc: SparkContext, filesOrPath: String)  extends java.io.Serializable
         filterExec(tokens(POS_SET_KEY),filterOfKey)
     })
   }
-
+  // wrap the operation of update command. .
+  def getUpdatesRdd(filterOfKey: String, minLen: Int, maxLen: Int):RDD[Array[String]]={
+    hdRdd.map(_.split(" ")).filter(tokens => {
+      tokens.length > POS_SET_LEN &&
+        (((tokens(POS_TYPE).startsWith("set") ||
+          tokens(POS_TYPE).startsWith("add") ) &&
+          (string2Int(tokens(POS_GET_LEN))>=minLen && string2Int(tokens(POS_GET_LEN))<=maxLen)))||
+          ((tokens(POS_TYPE).startsWith("incr") ||
+          tokens(POS_TYPE).startsWith("decr")) &&
+            (minLen<=22 && maxLen>0) /*FIXME*/) &&
+        filterExec(tokens(POS_SET_KEY),filterOfKey)
+    })
+  }
+  // wrap the operation of getting all delete's rdd from a key filter.
+  def getDeleteRdd(filterOfKey: String):RDD[Array[String]]={
+    hdRdd.map(_.split(" ")).filter(tokens => {
+      tokens.length > POS_GET_LEN && tokens(POS_TYPE).startsWith("delete") &&
+        filterExec(tokens(POS_GET_KEY),filterOfKey)
+    })
+  }
   // wrap the operation of getting all VALUE's rdd from a key filter.
   def getValueRdd(filterOfKey: String, minLen: Int, maxLen: Int):RDD[Array[String]]={
     hdRdd.map(_.split(" ")).filter(tokens => {
@@ -95,9 +115,9 @@ class Magic(sc: SparkContext, filesOrPath: String)  extends java.io.Serializable
 
   override def getGets(filterOfKey: String) = getGetsRdd(filterOfKey).count()
 
-  override def getUpdates(filterOfKey: String, minLen: Int, maxLen: Int) = 0
+  override def getUpdates(filterOfKey: String, minLen: Int, maxLen: Int) = getUpdatesRdd(filterOfKey,minLen,maxLen).count()
   override def getUpdatesFail(filterOfKey: String, minLen: Int, maxLen: Int) = 0
-  override def getDeletes(filterOfKey: String) = 0
+  override def getDeletes(filterOfKey: String) = getDeleteRdd(filterOfKey).count()
   override def getDeletesHits(filterOfKey: String) = 0
   /*
     2. Some  distribution of keys, values, and their propertys
@@ -109,7 +129,7 @@ class Magic(sc: SparkContext, filesOrPath: String)  extends java.io.Serializable
 
   def showValueLenDistribution(filterOfKey: String="", minLen: Int=0, maxLen: Int=4*1024*1024) = {
     var buff = ""
-    getValueLenDistribution(filterOfKey,minLen,maxLen).foreach(item=>buff += s"\n${item._1}\t${item._2}")
+    getValueLenDistribution(filterOfKey,minLen,maxLen).foreach(item=>buff  += s"\n${item._1}\t${item._2}")
     println("%table Value-len\tCount"+buff)
   }
 
@@ -181,49 +201,78 @@ class Magic(sc: SparkContext, filesOrPath: String)  extends java.io.Serializable
     4. Some operation to support spark SQL
    */
   def createTable(): Unit ={
-    hdRdd.map(_.split(" ")).map(tokens => if(tokens.length>POS_TYPE) {
-      Table(tokens(0).toFloat,
-        getPoolName(tokens),
-        getIp(tokens(POS_DST)),
-        getPort(tokens(POS_DST)),
-        getIp(tokens(POS_SRC)),
-        getPort(tokens(POS_SRC)),
-        tokens(POS_TYPE),
-        getKey(tokens),
-        getFlag(tokens),
-        getExpire(tokens),
-        getLen(tokens)
-      )
-    } else {
-      Table(0,"","",0,"",0,"","",0,0,0)
+    val sqlRdd = hdRdd.map(_.split(" ")).map(tokens => {
+      def getPoolName(tokens: Array[String]):String = "default"
+      def getIp(ipPort: String):String=ipPort.split(":")(0)
+      def getPort(ipPort: String):Int=ipPort.split(":")(1).toInt
+      def getKey(tokens: Array[String]):String = {
+        tokens(POS_TYPE) match  {
+          case "VALUE" => tokens(POS_GET_KEY)
+          case "set" => tokens(POS_SET_KEY)
+          case _ => ""
+        }
+      }
+      def getFlag(tokens: Array[String]):Long = {
+        tokens(POS_TYPE) match  {
+          case "VALUE" => tokens(POS_GET_FLG).toLong
+          case "set" => tokens(POS_SET_FLG).toLong
+          case _ => 0
+        }
+      }
+      def getExpire(tokens: Array[String]):Long = {
+        tokens(POS_TYPE) match  {
+          case "VALUE" => 0
+          case "set" => tokens(POS_SET_EXP).toLong
+          case _ => 0
+        }
+      }
+      if(tokens.length>POS_TYPE) {
+        Table(tokens(0).toFloat,
+          getPoolName(tokens),
+          getIp(tokens(POS_DST)),
+          getPort(tokens(POS_DST)),
+          getIp(tokens(POS_SRC)),
+          getPort(tokens(POS_SRC)),
+          tokens(POS_TYPE),
+          getKey(tokens),
+          getFlag(tokens),
+          getExpire(tokens),
+          getLen(tokens)
+        )
+      } else {
+        Table(0,"","",0,"",0,"","",0,0,0)
+      }
     })
-
-
-    def getPoolName(tokens: Array[String]):String = "default"
-    def getIp(ipPort: String):String=ipPort.split(":")(0)
-    def getPort(ipPort: String):Int=ipPort.split(":")(1).toInt
-    def getKey(tokens: Array[String]):String = {
-      tokens(POS_TYPE) match  {
-        case "VALUE" => tokens(POS_GET_KEY)
-        case "set" => tokens(POS_SET_KEY)
-        case _ => ""
-      }
-    }
-    def getFlag(tokens: Array[String]):Long = {
-      tokens(POS_TYPE) match  {
-        case "VALUE" => tokens(POS_GET_FLG).toLong
-        case "set" => tokens(POS_SET_FLG).toLong
-        case _ => 0
-      }
-    }
-    def getExpire(tokens: Array[String]):Long = {
-      tokens(POS_TYPE) match  {
-        case "VALUE" => 0
-        case "set" => tokens(POS_SET_EXP).toLong
-        case _ => 0
-      }
-    }
+    import sqlContext.createSchemaRDD
+    sqlRdd.registerTempTable(tableName)
+    println("####################")
+    println("Table name is :" + tableName + "\nschema is:")
+    sqlRdd.printSchema()
+    println("####################")
   }
+  def sql(sql: String) = {
+    var sqlTemp = ""
+    if (! sql.contains("limit")){
+      sqlTemp = sql + " limit 1000"
+    } else {
+      sqlTemp = sql
+    }
+    val resultRdd = sqlContext.sql(sqlTemp)
+    val result = resultRdd.collect()
+    var buff ="%table "
+    // get schema as the title
+    resultRdd.schema.fieldNames.foreach(buff += _ + "\t")
+    // delete last '/t'
+    buff = buff.substring(0,buff.length-1)
+    //fill the result to buff
+    result.foreach(row=>{
+      buff += "\n"
+      row.foreach(item =>buff += s"${item}\t")
+      buff = buff.substring(0,buff.length-1)
+    })
+    println(buff)
+  }
+
   def getLen(tokens: Array[String]):Int = {
     tokens(POS_TYPE) match  {
       case "VALUE" => tokens(POS_GET_LEN).toInt
@@ -262,6 +311,8 @@ object Magic {
     println("*******result is ******************")
     System.out.println("hitRate = " + magic.getGetsHitRate(filter))
     System.out.println("valueLen = " + magic.getValueLenDistribution(filter).mkString(","))
+    magic.createTable()
+    magic.sql("select * from magic where len > 1000")
     val endTime = new Date()
     System.out.println("###used time: "+(endTime.getTime()-startTime.getTime())+"ms. ###")
   }

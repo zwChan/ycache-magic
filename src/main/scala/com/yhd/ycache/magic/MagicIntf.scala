@@ -9,7 +9,8 @@ trait MagicIntf {
   /*
     0. init
    */
-  //def config(filesOrPath: String)
+  var tableName = "magic"
+  def setTableName(name: String="magic") { tableName = name}
   /*
     1. Some metric according to memcached stats
    */

@@ -15,7 +15,8 @@ case class Table(time: Float,
                     key: String,
                     flag: Long,
                     expire: Long,
-                    len: Int
+                    len: Int,
+                    value: Long
                    ) {
-
+  def toSeq() = (time::poolName::serverIp::serverPort::clientIp::clientPort::command::key::flag::expire::len::value::Nil).toSeq
 }

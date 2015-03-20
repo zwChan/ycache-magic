@@ -108,7 +108,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
           getFlag(tokens),
           getExpire(tokens),
           getLen(tokens),
-          new Random().nextInt(10000),
+          new Random().nextInt(2),
           getKey(tokens),
           getResult(tokens)
         )
@@ -261,7 +261,9 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
   }
 
   override def getUniqueValueLenDistribution(poolName: String, filterOfKey: String, minLen: Int=0, maxLen: Int=4*1024*1024) = {
-    getValueLenRdd(poolName, filterOfKey, minLen, maxLen).map(t => (t.value, t.len)).reduceByKey((v1,v2) => (v1+v2)/2)
+    /** XXX: (t.value*4*1024*1024 + t.len, t.len) => suposed that if the checksum of the value && the length of the value is equal,
+      * then the value is equal.*/
+    getValueLenRdd(poolName, filterOfKey, minLen, maxLen).map(t => (t.value*4*1024*1024 + t.len, t.len)).reduceByKey((v1,v2) => (v1+v2)/2)
       .map(vLen => (vLen._2, 1L)).reduceByKey(_+_).collect().toSeq
   }
 
@@ -329,8 +331,8 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
    *
    * @param poolName
    * @param filterOfKey
-   * @param number The first N get-command after a update-command
-   * @return
+   * @param number >0: The first N 'get' after a 'update'; 0: life span; -1: last 'get' after a 'update'
+   * @return RDD[(key:String, HashMap[number:Int, ArrayBuffer[interval:Double])]
    */
   def getFirstNGetIntervalDistributionData(poolName: String, filterOfKey: String, number: Int) = {
     tableRdd.filter(tbl => { //filter all update and get command
@@ -340,6 +342,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
       import scala.collection.mutable._
       var hitUpdate = false
       var updateTime = 0.0
+      var lastGetTime = 0.0
       var cnt = 0
       val retMap = new HashMap[Int, ArrayBuffer[Double]]()
       //get the first N  'get' after a 'set/add'
@@ -352,11 +355,17 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
           }
         } else {
           if (item.isUpdate) {
+            // '0' means the interval between two 'update' opreration
+            if (number == 0)retMap.getOrElseUpdate(cnt, new ArrayBuffer[Double]) += (item.time - updateTime)
+            //'-1' means the last 'get' command
+            if (cnt>0 && number == -1)retMap.getOrElseUpdate(cnt, new ArrayBuffer[Double]) += (item.time - lastGetTime)
             updateTime = item.time
             cnt = 0
-          } else if (item.isGet && cnt < number) {
+          } else if (item.isGet) {
             cnt += 1
-            retMap.getOrElseUpdate(cnt, new ArrayBuffer[Double]) += (item.time - updateTime)
+            //recored the first-N 'get' operation
+            if (cnt <= number) retMap.getOrElseUpdate(cnt, new ArrayBuffer[Double]) += (item.time - updateTime)
+            lastGetTime = item.time
           }
         }
         if (item.isDelete) {
@@ -369,55 +378,13 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
     })
   }
 
-  /**
-   *
-   * @param poolName
-   * @param filterOfKey
-   * @return
-   */
-  def getLastGetIntervalDistribution(poolName: String, filterOfKey: String) = {
-    tableRdd.filter(tbl => { //filter all update and get command
-      ( tbl.isUpdate || tbl.isGet ) &&
-        filterExec(tbl,poolName,filterOfKey)
-    }).groupBy(_.key).map(kv => {
-      import scala.collection.mutable._
-      var hitUpdate = false
-      var updateTime = 0.0
-      var cnt = 0
-      val retMap = new HashMap[Int, ArrayBuffer[Double]]()
-      //get the last 'get' after a 'set/add'
-      kv._2.toArray.sortBy(_.time).map( item => {
-        if (!hitUpdate) {
-          if (item.isUpdate) {
-            updateTime = item.time
-            cnt = 0
-            hitUpdate = true
-          }
-        } else {
-          if (item.isUpdate) {
-            if (cnt>0) retMap.getOrElseUpdate(1, new ArrayBuffer[Double]) += (item.time - updateTime)
-            updateTime = item.time
-            cnt = 0
-          } else if (item.isGet) {
-            cnt += 1
-          }
-        }
-        if (item.isDelete) {
-          updateTime = 0
-          cnt = 0
-          hitUpdate = false
-        }
-      })
-      (kv._1, retMap)
-    })
-  }
-  /*
+   /*
     Get the interval between a key miss and last get operation.
     This distribution tells us if the expire is reasonable
     @params: threshold: Int, the max interval we care.
    */
   override def getLastGetIntervalDistribution(poolName: String, filterOfKey: String, start: Double, end: Double) = {
-    val ret = getLastGetIntervalDistribution(poolName,filterOfKey).map(_._2.get(1)).filter(_.isDefined).flatMap(_.get)
+    val ret = getFirstNGetIntervalDistributionData(poolName,filterOfKey,-1).flatMap(_._2).map(_._2).flatMap(r => r)
     ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
   }
   def showLastGetIntervalDistribution(poolName: String, filterOfKey: String, threshold: Int, start: Double, end: Double) = {
@@ -430,7 +397,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
     It means how long a key keep alive.
    */
   override def getLifeSpanDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double) = {
-    val ret = getLifeSpanGetsDistribution(poolName, filterOfKey).flatMap(kv => kv._2).flatMap(kv => kv._2)
+    val ret = getFirstNGetIntervalDistributionData(poolName, filterOfKey,0).map(_._2.get(0)).filter(_.isDefined).flatMap(_.get)
     ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
   }
   def showLifeSpanDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double) = {
@@ -438,56 +405,15 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
     getLifeSpanDistribution(poolName, filterOfKey,start,end).foreach(item=>buff += s"\n${item._1}\t${item._2}")
     println(buff)
   }
-  /**
-   * Get the number of get-command int the key's life span
-   * @param poolName
-   * @param filterOfKey
-   * @return
-   */
-  def getLifeSpanGetsDistribution(poolName: String, filterOfKey: String) = {
-    tableRdd.filter(tbl => { //filter all update and get command
-        filterExec(tbl,poolName,filterOfKey)
-    }).groupBy(_.key).map(kv => {
-      import scala.collection.mutable._
-      var hitUpdate = false
-      var updateTime = 0.0
-      var cnt = 0
-      val retMap = new HashMap[Int, ArrayBuffer[Double]]()
-      //get the last 'get' after a 'set/add'
-      kv._2.toArray.sortBy(_.time).map( item => {
-        if (!hitUpdate) {
-          if (item.isUpdate) {
-            updateTime = item.time
-            cnt = 0
-            hitUpdate = true
-          }
-        } else {
-          if (item.isUpdate) {
-            retMap.getOrElseUpdate(cnt, new ArrayBuffer[Double]) += (item.time - updateTime)
-            updateTime = item.time
-            cnt = 0
-          } else if (item.isGet) {
-            cnt += 1
-          }
-        }
-        if (item.isDelete) {
-          updateTime = 0
-          cnt = 0
-          hitUpdate = false
-        }
-      })
-      (kv._1, retMap)
-    })
-  }
 
   /*
     Get the gets number between the key update and miss.
     It means how many gets we are benefited during a key's life
  */
   override def getLifeBenefitDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double)  = {
-    val ret = getLifeSpanGetsDistribution(poolName, filterOfKey).flatMap(kv => kv._2)
+    val ret = getFirstNGetIntervalDistributionData(poolName, filterOfKey,0).flatMap(kv => kv._2)
       .map(kv => (kv._1,kv._2.map(d => (d,kv._1)))).flatMap(_._2)
-    ret.map(kv => (Magic.truncateAt(kv._1, precision), kv._2*1L)).reduceByKey((v1,v2) => (v1+v2)/2).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+    ret.map(kv => (Magic.truncateAt(kv._1, precision), kv._2*1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
   }
   def showLifeBenefitDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double) = {
     var buff = "%table LifeSpan\tGetsCount"
@@ -498,37 +424,51 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
     Get the counter distribution of updating a key with the same value by value's length
  */
   override def getUpdateSameDistribution(poolName: String, filterOfKey: String,  minCnt: Int, maxCnt: Int) = {
-    val ret = getUpdateSameDistributionData(poolName, filterOfKey).flatMap(kv => kv._2)
+    val ret = getUpdateSameDistributionData(poolName, filterOfKey,0).flatMap(kv => kv._2)
     .map(kv => (kv._1,kv._2.map(d => (kv._1,d)))).flatMap(_._2)
     ret.map(kv => (kv._1, 1L)).reduceByKey(_+_).sortByKey().filter(kv => kv._1>=minCnt && kv._1 <= maxCnt).collect().toSeq
   }
   def showUpdateSameDistribution(poolName: String, filterOfKey: String,  minCnt: Int, maxCnt: Int) = {
-    var buff = "%table ValueLen\tCount"
+    var buff = "%table repeatTimes\tCount"
     getUpdateSameDistribution(poolName, filterOfKey,minCnt,maxCnt).foreach(item=>buff += s"\n${item._1}\t${item._2}")
     println(buff)
   }
-  def getUpdateSameDistributionData(poolName: String, filterOfKey: String) = {
-    tableRdd.filter(tbl => { //filter all update and get command
-      (tbl.isSet || tbl.isAdd) &&
+
+  /**
+   *
+   * @param poolName
+   * @param filterOfKey
+   * @param opType 0: to get the number of continue update the same value; 1: to get interval ...
+   * @return RDD[(key:String, HashMap[number:Int, ArrayBuffer[interval:Double])]
+   */
+  def getUpdateSameDistributionData(poolName: String, filterOfKey: String, opType: Int) = {
+    tableRdd.filter(tbl => {
+      (tbl.isUpdate) &&
         filterExec(tbl,poolName,filterOfKey)
     }).groupBy(_.key).map(kv => {
       import scala.collection.mutable._
       var lastTime = 0.0
       var lastValue = -1L
       var lastLen = 0
+      var cnt = 0
       val retMap = new HashMap[Int, ArrayBuffer[Double]]()
       //get the last 'get' after a 'set/add'
       kv._2.toArray.sortBy(_.time).map( item => {
-        if (lastValue == item.value) {
-          retMap.getOrElseUpdate(item.len, new ArrayBuffer[Double]) += (item.time - lastTime)
-
+        if (lastValue == item.value && lastLen == item.len) {
+          cnt += 1
+          if (opType ==1) {
+            retMap.getOrElseUpdate(cnt, new ArrayBuffer[Double]) += (item.time - lastTime)
+            lastTime  = item.time
+          }
         } else {
-          lastTime = 0
-          lastValue = -1
-          lastLen = 0
+          if (opType ==0 && cnt > 0) {
+            retMap.getOrElseUpdate(cnt, new ArrayBuffer[Double]) += (item.time - lastTime)
+          }
+          cnt = 0
+          lastTime  = item.time
         }
         lastValue = item.value
-        lastLen = item.len
+        lastLen   = item.len
       })
       (kv._1, retMap)
     })
@@ -539,9 +479,8 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
     Get the interval distribution of updating a key with the same value
    */
   override def getUpdateSameIntervalDistribution(poolName: String, filterOfKey: String, start: Double, end: Double) = {
-    val ret = getUpdateSameDistributionData(poolName, filterOfKey).flatMap(kv => kv._2)
-      .map(kv => (kv._1,kv._2.map(d => (kv._1,d)))).flatMap(_._2)
-    ret.map(kv => (Magic.truncateAt(kv._2, precision), 1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+    val ret = getUpdateSameDistributionData(poolName, filterOfKey,1).flatMap(kv => kv._2).flatMap(_._2);
+    ret.map(i => (Magic.truncateAt(i, precision), 1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
   }
   def showUpdateSameIntervalDistribution(poolName: String, filterOfKey: String, start: Double, end: Double) = {
     var buff = "%table Interval\tCount"

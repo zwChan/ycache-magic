@@ -1,7 +1,7 @@
 
 package com.yhd.ycache.magic
 
-import java.util.Date
+import java.util.{Random, Date}
 
 import org.apache.hadoop.fs.Path
 import org.apache.spark.rdd.{RDD, HadoopRDD}
@@ -24,20 +24,24 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
      0. init
     */
   def POS_GET_KEY = 4
-  def POS_GET_FLG = 5
-  def POS_GET_LEN = 6
+  def POS_GET_FLG = 9
+  def POS_GET_LEN = 10
+  def POS_GET_RET = 8
   def POS_SET_KEY = 4
   def POS_SET_FLG = 5
   def POS_SET_EXP = 6
   def POS_SET_LEN = 7
+  def POS_SET_RET = 8
   def POS_TIME = 0
   def POS_DST  = 1
   def POS_SRC  = 2
   def POS_TYPE = 3
+  def POS_MIN = 11
+  def precision = 1
 
   private val sqlContext = new org.apache.spark.sql.SQLContext(sc)
-  val tableRdd = sc.textFile(files,5).flatMap(_.split("\n"))
-    .map(_.split(" ")).filter(_.length>POS_TYPE)
+  val tableRdd = sc.textFile(files,7).flatMap(_.split("\n"))
+    .map(_.split(" ")).filter(_.length>=POS_MIN)
     .map(tokens => {
       def getPoolNameByIpPort(ipPort: String): String = {
         if (poolInfo != null && ipPort != null) {
@@ -48,9 +52,9 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
         null
       }
       def getPoolName(tks: Array[String]):String = {
-        val p = getPoolNameByIpPort(tks(POS_DST).trim)
+        val p = getPoolNameByIpPort(tks(POS_DST).trim) //use server-ip and port
           if (p == null) {
-            val p2 = getPoolNameByIpPort(tks(POS_SRC).trim)
+            val p2 = getPoolNameByIpPort(getIp(tks(POS_SRC))+":") //use client-ip only
             if (p2 == null)
               return "default"
             else
@@ -60,44 +64,56 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
           }
       }
       def getIp(ipPort: String):String=ipPort.split(":")(0)
-      def getPort(ipPort: String):Int=ipPort.split(":")(1).toInt
+      def getPort(ipPort: String):Int=string2Int(ipPort.split(":")(1))
       def getKey(tokens: Array[String]):String = {
         tokens(POS_TYPE) match  {
-          case "VALUE" => tokens(POS_GET_KEY)
-          case "set" => tokens(POS_SET_KEY)
+          case "get" | "GET" => tokens(POS_GET_KEY)
+          case "set" | "SET" | "add" | "ADD" => tokens(POS_SET_KEY)
+          case "delete" | "DELETE" => tokens(POS_GET_KEY)
+          case "incr" | "decr" | "touch" => tokens(POS_GET_KEY)
           case _ => ""
         }
       }
       def getFlag(tokens: Array[String]):Long = {
         tokens(POS_TYPE) match  {
-          case "VALUE" => tokens(POS_GET_FLG).toLong
-          case "set" => tokens(POS_SET_FLG).toLong
+          case "get" | "GET"  => string2Int(tokens(POS_GET_FLG))
+          case "set" | "SET" | "add" | "ADD" => string2Long(tokens(POS_SET_FLG))
           case _ => 0
         }
       }
       def getExpire(tokens: Array[String]):Long = {
         tokens(POS_TYPE) match  {
-          case "VALUE" => 0
-          case "set" => tokens(POS_SET_EXP).toLong
+          case "set" | "SET" | "add" | "ADD" => string2Long(tokens(POS_SET_EXP))
           case _ => 0
         }
       }
-      if(tokens.length>POS_TYPE) {
-        Table(tokens(0).toFloat,
+    def getResult(tokens: Array[String]):String = {
+      tokens(POS_TYPE) match  {
+        case "get" | "GET" => tokens(POS_GET_RET)
+        case "set" | "SET" | "add" | "ADD" => tokens(POS_SET_RET)
+        case "delete" | "DELETE" =>tokens(POS_SET_RET)
+        case "incr" | "decr" | "touch" => tokens(POS_SET_RET)
+        case _ => ""
+      }
+    }
+
+    if(tokens.length>POS_TYPE) {
+        Table(Magic.truncateAt(tokens(0).toDouble,6),
           getPoolName(tokens),
           getIp(tokens(POS_DST)),
           getPort(tokens(POS_DST)),
           getIp(tokens(POS_SRC)),
           getPort(tokens(POS_SRC)),
-          tokens(POS_TYPE),
-          getKey(tokens),
+          tokens(POS_TYPE).toLowerCase(),
           getFlag(tokens),
           getExpire(tokens),
           getLen(tokens),
-          0
+          new Random().nextInt(10000),
+          getKey(tokens),
+          getResult(tokens)
         )
       } else {
-        Table(0,"","",0,"",0,"","",0,0,0,0)
+        Table(0,"","",0,"",0,"",0,0,0,0,"","")
       }
   }).persist()
   
@@ -105,175 +121,433 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
     try {
       s.toInt
     } catch {
-      case e: Exception => default
+      case e: Exception => println(s"string2Int error: ${s}"); default
     }
   }
-
+  def string2Long(s: String, default: Long=0):Long = {
+    try {
+      s.toLong
+    } catch {
+      case e: Exception => println(s"string2Long error: ${s}"); default
+    }
+  }
   /*
     Normalize the filter.
     if format is  /***/, used as *** a regular expression
     else match as a substring
     The output is regular expression
    */
-  def filterExec(tbl: Table, poolNameFilter: String, filterOfKey: String):Boolean = {
+  def filterExec(tbl: Table, poolNameFilter: String = "", filterOfKey: String = "", minLen: Int=0, maxLen: Int=4*1024*1024):Boolean = {
     var ret = true
 
-    if (poolNameFilter != null && poolNameFilter != "all")
+    if (poolNameFilter.length > 0 && poolNameFilter != "all")
       ret &&= tbl.poolName == poolNameFilter
 
-    if (filterOfKey != null && filterOfKey != "all") {
+    if (filterOfKey.length > 0 && filterOfKey != "all") {
       if (filterOfKey.startsWith("/") && filterOfKey.endsWith("/") && filterOfKey.length >= 2) {
         ret &&= tbl.key.matches(filterOfKey.substring(1, filterOfKey.length - 1))
       } else {
         ret &&= tbl.key.contains(filterOfKey)
       }
     }
+    ret &&= tbl.len >= minLen && tbl.len <= maxLen
     ret
   }
 
   /*
     1. Some metric according to memcached stats
    */
-  override def getGetsHitRate(poolName: String, filterOfKey: String):Double= {
-    val allGets = getGetsRdd(poolName,filterOfKey)
-    allGets.persist()
-    val missNum = allGets.filter(t => t.len == 0).count()
-    val hitNum = allGets.filter(t => t.len > 0).count()
-    allGets.unpersist()
-    if (hitNum + missNum > 0) {
-      missNum * 1.0 / (hitNum + missNum)
-    } else {
-      0
-    }
-  }
+//  override def getGetsHitRate(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int):Double= {
+//    val allGets = getGetsRdd(poolName,filterOfKey, minLen, maxLen)
+//    allGets.persist()
+//    val missNum = allGets.filter(t => t.len == 0).count()
+//    val hitNum = allGets.filter(t => t.len > 0).count()
+//    allGets.unpersist()
+//    if (hitNum + missNum > 0) {
+//      missNum * 1.0 / (hitNum + missNum)
+//    } else {
+//      0
+//    }
+//  }
 
   // wrap the operation of getting gets command result's rdd by a key filter.
-  def getGetsRdd(poolName: String, filterOfKey: String):RDD[Table]={
+  def getGetsRdd(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int):RDD[Table]={
     tableRdd.filter(tbl => {
-      tbl.command.startsWith("VALUE") &&
-        filterExec(tbl,poolName,filterOfKey)
+      tbl.isGet &&
+        filterExec(tbl,poolName,filterOfKey,minLen,maxLen)
     })
   }
 
   // wrap the operation of setting gets command result's rdd by a key filter.
-  def getSetsRdd(poolName: String, filterOfKey: String):RDD[Table]={
+  def getSetsRdd(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int):RDD[Table]={
     tableRdd.filter(tbl => {
-      tbl.command.startsWith("set") &&
+      tbl.isSet &&
+        filterExec(tbl,poolName,filterOfKey,minLen, maxLen)
+    })
+  }
+  // wrap the operation of setting gets command result's rdd by a key filter.
+  def getExpireRdd(poolName: String, filterOfKey: String):RDD[Table]={
+    tableRdd.filter(tbl => {
+      (tbl.expire > 0) &&
         filterExec(tbl,poolName,filterOfKey)
     })
   }
   // wrap the operation of update command. .
   def getUpdatesRdd(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int):RDD[Table]={
     tableRdd.filter(tbl => {
-      (((tbl.command.startsWith("set") ||
-          tbl.command.startsWith("add") ) &&
-        (tbl.len >= minLen && tbl.len <= maxLen))||
-        ((tbl.command.startsWith("incr") ||
-            tbl.command.startsWith("decr")) &&
-            (minLen<=22 && maxLen>0) /*FIXME*/)) &&
-        filterExec(tbl, poolName, filterOfKey)
+      tbl.isUpdate &&
+        filterExec(tbl, poolName, filterOfKey, minLen, maxLen)
     })
   }
   // wrap the operation of getting all delete's rdd from a key filter.
   def getDeleteRdd(poolName: String, filterOfKey: String):RDD[Table]={
     tableRdd.filter(tbl => {
-      tbl.command.startsWith("delete") &&
+      tbl.isDelete &&
         filterExec(tbl, poolName, filterOfKey)
     })
   }
   // wrap the operation of getting all VALUE's rdd from a key filter.
-  def getValueRdd(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int):RDD[Table]={
+  def getValueLenRdd(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int):RDD[Table]={
     tableRdd.filter(tbl => {
-      tbl.command.startsWith("VALUE") &&
-        (tbl.len >= minLen && tbl.len <= maxLen) &&
-        filterExec(tbl, poolName, filterOfKey)
+      tbl.isWithValue &&
+        filterExec(tbl, poolName, filterOfKey, minLen, maxLen)
     })
   }
 
-  override def getGets(poolName: String, filterOfKey: String) = getGetsRdd(poolName, filterOfKey).count()
-
+  override def getGets(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = getGetsRdd(poolName, filterOfKey, minLen, maxLen).count()
+  override def getGetsHits(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = getGetsRdd(poolName, filterOfKey, minLen, maxLen).filter(_.result.startsWith("VALUE")).count()
+  override def getGetsFail(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = getGetsRdd(poolName, filterOfKey, minLen, maxLen).filter(_.result.contains("ERROR")).count()
   override def getUpdates(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = getUpdatesRdd(poolName, filterOfKey,minLen,maxLen).count()
-  override def getUpdatesFail(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = 0
+  override def getUpdatesFail(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = getUpdatesRdd(poolName, filterOfKey,minLen,maxLen).filter(_.result.contains("ERROR")).count()
   override def getDeletes(poolName: String, filterOfKey: String) = getDeleteRdd(poolName, filterOfKey).count()
-  override def getDeletesHits(poolName: String, filterOfKey: String) = 0
+  override def getDeleteHits(poolName: String, filterOfKey: String) = getDeleteRdd(poolName, filterOfKey).count()
+  override def getDeletesFail(poolName: String, filterOfKey: String) = getDeleteRdd(poolName, filterOfKey).filter(_.result.contains("ERROR")).count()
+  override def getDeletesHits(poolName: String, filterOfKey: String) = getDeleteRdd(poolName, filterOfKey).filter(_.result.contains("DELETED")).count()
+
+  def showStats(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = {
+    var buff = "%table Items\tValues\tItems\tValues"
+
+    buff += "\n gets\t"+getGets(poolName, filterOfKey, minLen, maxLen)
+    buff += "\t getHits\t"+getGetsHits(poolName, filterOfKey, minLen, maxLen)
+    buff += "\n getHitRate\t"+Magic.ceilAt(4)(getGetsHitRate(poolName, filterOfKey, minLen, maxLen))
+    buff += "\t updates\t"+getUpdates(poolName, filterOfKey, minLen, maxLen)
+    buff += "\n deletes\t"+getDeletes(poolName, filterOfKey)
+    buff += "\t deleteHits\t"+getDeleteHits(poolName, filterOfKey)
+    buff += "\n deleteHitRate\t"+getDeleteHitRate(poolName, filterOfKey)
+    buff += "\t getFails\t"+getGetsFail(poolName, filterOfKey, minLen, maxLen)
+    buff += "\n updateFails\t"+getUpdatesFail(poolName, filterOfKey, minLen, maxLen)
+    buff += "\t deleteFails\t"+getDeletesFail(poolName, filterOfKey)
+
+    println(buff)
+
+  }
   /*
     2. Some  distribution of keys, values, and their propertys
    */
   override def getValueLenDistribution(poolName: String, filterOfKey: String="", minLen: Int=0, maxLen: Int=4*1024*1024) = {
-    getValueRdd(poolName, filterOfKey, minLen, maxLen).map(tokens =>(tokens.len,1L)).
+    getValueLenRdd(poolName, filterOfKey, minLen, maxLen).map(tokens =>(tokens.len,1L)).
       reduceByKey(_+_).sortByKey().collect().toSeq
   }
 
-  def showValueLenDistribution(poolName: String, filterOfKey: String="", minLen: Int=0, maxLen: Int=4*1024*1024) = {
+  def showValueLenDistribution(poolName: String, filterOfKey: String="", unique: Boolean=false, minLen: Int=0, maxLen: Int=4*1024*1024) = {
     var buff = ""
-    getValueLenDistribution(poolName, filterOfKey,minLen,maxLen).foreach(item=>buff  += s"\n${item._1}\t${item._2}")
+    (if (!unique) {
+      getValueLenDistribution(poolName, filterOfKey,minLen,maxLen)
+    } else {
+      getUniqueValueLenDistribution(poolName, filterOfKey,minLen,maxLen)
+    })
+      .foreach(item=>buff  += s"\n${item._1}\t${item._2}")
     println("%table Value-len\tCount"+buff)
   }
 
-  override def getUniqueValueLenDistribution(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) =0
-
-  override def getKeyLenDistribution(poolName: String, filterOfKey: String="", minLen: Int=0, maxLen: Int=250) = {
-    getValueRdd(poolName, filterOfKey,minLen,maxLen).map(tokens =>(tokens.key.length,1L)).
-      reduceByKey(_+_).sortByKey().collect().toSeq
+  override def getUniqueValueLenDistribution(poolName: String, filterOfKey: String, minLen: Int=0, maxLen: Int=4*1024*1024) = {
+    getValueLenRdd(poolName, filterOfKey, minLen, maxLen).map(t => (t.value, t.len)).reduceByKey((v1,v2) => (v1+v2)/2)
+      .map(vLen => (vLen._2, 1L)).reduceByKey(_+_).collect().toSeq
   }
 
-  def showKeyLenDistribution(poolName: String, filterOfKey: String="", minLen: Int=0, maxLen: Int=250) = {
+  override def getKeyLenDistribution(poolName: String, filterOfKey: String="", minKeyLen: Int=0, maxKeyLen: Int=250) = {
+    tableRdd.filter(tbl => filterExec(tbl, poolName, filterOfKey) && tbl.key.length >= minKeyLen && tbl.key.length <= maxKeyLen)
+      .map(tokens =>(tokens.key.length,1L)).reduceByKey(_+_).sortByKey().collect().toSeq
+  }
+
+  def showKeyLenDistribution(poolName: String, filterOfKey: String="", unique: Boolean=false, minKeyLen: Int=0, maxKeyLen: Int=250) = {
     var buff = ""
-    getValueLenDistribution(poolName, filterOfKey,minLen,maxLen).foreach(item=>buff += s"\n${item._1}\t${item._2}")
+    (if (!unique) {
+      getKeyLenDistribution(poolName, filterOfKey, minKeyLen, maxKeyLen)
+    }else {
+      getUniqueKeyLenDistribution(poolName, filterOfKey, minKeyLen, maxKeyLen)
+    })
+      .foreach(item=>buff += s"\n${item._1}\t${item._2}")
     println("%table Key-len\tCount"+buff)
   }
 
-  override def getUniqueKeyLenDistribution(poolName: String, filterOfKey: String) = 0
+  override def getUniqueKeyLenDistribution(poolName: String, filterOfKey: String, minKeyLen: Int=0, maxKeyLen: Int=250) = {
+    tableRdd.filter(tbl => filterExec(tbl, poolName, filterOfKey) && tbl.key.length >= minKeyLen && tbl.key.length <= maxKeyLen)
+      .map(t => (t.key, t.key.length)).reduceByKey((v1,v2) => (v1+v2)/2)
+      .map(kLen => (kLen._2, 1L)).reduceByKey(_+_).collect().toSeq
+  }
 
-  override def getExpireDistribution(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = {
-    getSetsRdd(poolName, filterOfKey).filter(tokens =>
-        tokens.expire >= minLen && tokens.expire <= maxLen
+  override def getExpireDistribution(poolName: String, filterOfKey: String, minExp: Long, maxExp: Long) = {
+    getExpireRdd(poolName, filterOfKey).filter(tokens =>
+        tokens.expire >= minExp && tokens.expire <= maxExp
         ).map(tokens =>(tokens.expire,1L)
       ).reduceByKey(_+_).sortByKey().collect().toSeq
   }
-  def showExpireDistribution(poolName: String, filterOfKey: String="", minLen: Int=0, maxLen: Int=60*60*24*30) = {
+  def showExpireDistribution(poolName: String, filterOfKey: String="", unique: Boolean=false, minExp: Long=0, maxExp: Long=60*60*24*30) = {
     var buff = ""
-    getExpireDistribution(poolName, filterOfKey, minLen, maxLen).foreach(item=>buff += s"\n${item._1}\t${item._2}")
+    (if (!unique) {
+      getExpireDistribution(poolName, filterOfKey, minExp, maxExp)
+    }else {
+      getUniqueExpireDistribution(poolName, filterOfKey, minExp, maxExp)
+    })
+      .foreach(item=>buff += s"\n${item._1}\t${item._2}")
     println("%table Expire\tCount"+buff)
   }
-  override def getUniqueExpireDistribution(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = 0
+  override def getUniqueExpireDistribution(poolName: String, filterOfKey: String, minExp: Long=0, maxExp: Long=60*60*24*30) = {
+    getExpireRdd(poolName, filterOfKey).filter(tokens =>
+      tokens.expire >= minExp && tokens.expire <= maxExp
+    ).map(t => (t.key, t.expire)).reduceByKey((v1,v2) => (v1+v2)/2)
+      .map(kExp => (kExp._2, 1L))
+      .reduceByKey(_+_).sortByKey().collect().toSeq
+  }
 
   /*
     3. Some  distribution of commands, commands' intervals
    */
   //Get the interval between a key update and get operation.
   // This distribution tells us if the expire is reasonable
-  override def getFirstGetIntervalDistribution(poolName: String, filterOfKey: String) = {}
+  override def getFirstNGetIntervalDistribution(poolName: String, filterOfKey: String, firstN: Int=1, start: Double, end: Double): Seq[(Double, Long)] = {
+    val ret = getFirstNGetIntervalDistributionData(poolName,filterOfKey,firstN).map(_._2.get(firstN)).filter(_.isDefined).flatMap(_.get)
+    ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+  }
+  def showFirstNGetIntervalDistribution(poolName: String, filterOfKey: String, firstN: Int=1, start: Double, end: Double) = {
+    var buff = "%table firstN\tInterval\tCount"
+    Range(1,firstN+1).foreach(num => getFirstNGetIntervalDistribution(poolName, filterOfKey, num, start, end).foreach(item=>buff += s"\n${num}\t${item._1}\t${item._2}"))
+    println(buff)
+  }
+  /**
+   *
+   * @param poolName
+   * @param filterOfKey
+   * @param number The first N get-command after a update-command
+   * @return
+   */
+  def getFirstNGetIntervalDistributionData(poolName: String, filterOfKey: String, number: Int) = {
+    tableRdd.filter(tbl => { //filter all update and get command
+      ( tbl.isUpdate || tbl.isGet ) &&
+        filterExec(tbl,poolName,filterOfKey)
+    }).groupBy(_.key).map(kv => {
+      import scala.collection.mutable._
+      var hitUpdate = false
+      var updateTime = 0.0
+      var cnt = 0
+      val retMap = new HashMap[Int, ArrayBuffer[Double]]()
+      //get the first N  'get' after a 'set/add'
+      kv._2.toArray.sortBy(_.time).map( item => {
+        if (!hitUpdate) {
+          if (item.isUpdate) {
+            updateTime = item.time
+            cnt = 0
+            hitUpdate = true
+          }
+        } else {
+          if (item.isUpdate) {
+            updateTime = item.time
+            cnt = 0
+          } else if (item.isGet && cnt < number) {
+            cnt += 1
+            retMap.getOrElseUpdate(cnt, new ArrayBuffer[Double]) += (item.time - updateTime)
+          }
+        }
+        if (item.isDelete) {
+          updateTime = 0
+          cnt = 0
+          hitUpdate = false
+        }
+      })
+      (kv._1, retMap)
+    })
+  }
+
+  /**
+   *
+   * @param poolName
+   * @param filterOfKey
+   * @return
+   */
+  def getLastGetIntervalDistribution(poolName: String, filterOfKey: String) = {
+    tableRdd.filter(tbl => { //filter all update and get command
+      ( tbl.isUpdate || tbl.isGet ) &&
+        filterExec(tbl,poolName,filterOfKey)
+    }).groupBy(_.key).map(kv => {
+      import scala.collection.mutable._
+      var hitUpdate = false
+      var updateTime = 0.0
+      var cnt = 0
+      val retMap = new HashMap[Int, ArrayBuffer[Double]]()
+      //get the last 'get' after a 'set/add'
+      kv._2.toArray.sortBy(_.time).map( item => {
+        if (!hitUpdate) {
+          if (item.isUpdate) {
+            updateTime = item.time
+            cnt = 0
+            hitUpdate = true
+          }
+        } else {
+          if (item.isUpdate) {
+            if (cnt>0) retMap.getOrElseUpdate(1, new ArrayBuffer[Double]) += (item.time - updateTime)
+            updateTime = item.time
+            cnt = 0
+          } else if (item.isGet) {
+            cnt += 1
+          }
+        }
+        if (item.isDelete) {
+          updateTime = 0
+          cnt = 0
+          hitUpdate = false
+        }
+      })
+      (kv._1, retMap)
+    })
+  }
   /*
     Get the interval between a key miss and last get operation.
     This distribution tells us if the expire is reasonable
     @params: threshold: Int, the max interval we care.
    */
-  override def getLastGetIntervalDistribution(poolName: String, filterOfKey: String, threshold: Int) ={}
-
+  override def getLastGetIntervalDistribution(poolName: String, filterOfKey: String, start: Double, end: Double) = {
+    val ret = getLastGetIntervalDistribution(poolName,filterOfKey).map(_._2.get(1)).filter(_.isDefined).flatMap(_.get)
+    ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+  }
+  def showLastGetIntervalDistribution(poolName: String, filterOfKey: String, threshold: Int, start: Double, end: Double) = {
+    var buff = "%table Interval\tCount"
+    getLastGetIntervalDistribution(poolName, filterOfKey, start, end).foreach(item=>buff += s"\n${item._1}\t${item._2}")
+    println(buff)
+  }
   /*
     Get the interval between the key update and miss.
     It means how long a key keep alive.
    */
-  override def getLifeSpanDistribution(poolName: String, filterOfKey: String) = {}
+  override def getLifeSpanDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double) = {
+    val ret = getLifeSpanGetsDistribution(poolName, filterOfKey).flatMap(kv => kv._2).flatMap(kv => kv._2)
+    ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+  }
+  def showLifeSpanDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double) = {
+    var buff = "%table LifeSpan\tCount"
+    getLifeSpanDistribution(poolName, filterOfKey,start,end).foreach(item=>buff += s"\n${item._1}\t${item._2}")
+    println(buff)
+  }
+  /**
+   * Get the number of get-command int the key's life span
+   * @param poolName
+   * @param filterOfKey
+   * @return
+   */
+  def getLifeSpanGetsDistribution(poolName: String, filterOfKey: String) = {
+    tableRdd.filter(tbl => { //filter all update and get command
+        filterExec(tbl,poolName,filterOfKey)
+    }).groupBy(_.key).map(kv => {
+      import scala.collection.mutable._
+      var hitUpdate = false
+      var updateTime = 0.0
+      var cnt = 0
+      val retMap = new HashMap[Int, ArrayBuffer[Double]]()
+      //get the last 'get' after a 'set/add'
+      kv._2.toArray.sortBy(_.time).map( item => {
+        if (!hitUpdate) {
+          if (item.isUpdate) {
+            updateTime = item.time
+            cnt = 0
+            hitUpdate = true
+          }
+        } else {
+          if (item.isUpdate) {
+            retMap.getOrElseUpdate(cnt, new ArrayBuffer[Double]) += (item.time - updateTime)
+            updateTime = item.time
+            cnt = 0
+          } else if (item.isGet) {
+            cnt += 1
+          }
+        }
+        if (item.isDelete) {
+          updateTime = 0
+          cnt = 0
+          hitUpdate = false
+        }
+      })
+      (kv._1, retMap)
+    })
+  }
 
   /*
     Get the gets number between the key update and miss.
     It means how many gets we are benefited during a key's life
  */
-  override def getLifeBenefitDistribution(poolName: String, filterOfKey: String) = {}
-
+  override def getLifeBenefitDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double)  = {
+    val ret = getLifeSpanGetsDistribution(poolName, filterOfKey).flatMap(kv => kv._2)
+      .map(kv => (kv._1,kv._2.map(d => (d,kv._1)))).flatMap(_._2)
+    ret.map(kv => (Magic.truncateAt(kv._1, precision), kv._2*1L)).reduceByKey((v1,v2) => (v1+v2)/2).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+  }
+  def showLifeBenefitDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double) = {
+    var buff = "%table LifeSpan\tGetsCount"
+    getLifeBenefitDistribution(poolName, filterOfKey, start, end).foreach(item=>buff += s"\n${item._1}\t${item._2}")
+    println(buff)
+  }
   /*
-    Get the counter distribution of updating a key with the same value
+    Get the counter distribution of updating a key with the same value by value's length
  */
-  override def getUpdateSameDistribution(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = {}
+  override def getUpdateSameDistribution(poolName: String, filterOfKey: String,  minCnt: Int, maxCnt: Int) = {
+    val ret = getUpdateSameDistributionData(poolName, filterOfKey).flatMap(kv => kv._2)
+    .map(kv => (kv._1,kv._2.map(d => (kv._1,d)))).flatMap(_._2)
+    ret.map(kv => (kv._1, 1L)).reduceByKey(_+_).sortByKey().filter(kv => kv._1>=minCnt && kv._1 <= maxCnt).collect().toSeq
+  }
+  def showUpdateSameDistribution(poolName: String, filterOfKey: String,  minCnt: Int, maxCnt: Int) = {
+    var buff = "%table ValueLen\tCount"
+    getUpdateSameDistribution(poolName, filterOfKey,minCnt,maxCnt).foreach(item=>buff += s"\n${item._1}\t${item._2}")
+    println(buff)
+  }
+  def getUpdateSameDistributionData(poolName: String, filterOfKey: String) = {
+    tableRdd.filter(tbl => { //filter all update and get command
+      (tbl.isSet || tbl.isAdd) &&
+        filterExec(tbl,poolName,filterOfKey)
+    }).groupBy(_.key).map(kv => {
+      import scala.collection.mutable._
+      var lastTime = 0.0
+      var lastValue = -1L
+      var lastLen = 0
+      val retMap = new HashMap[Int, ArrayBuffer[Double]]()
+      //get the last 'get' after a 'set/add'
+      kv._2.toArray.sortBy(_.time).map( item => {
+        if (lastValue == item.value) {
+          retMap.getOrElseUpdate(item.len, new ArrayBuffer[Double]) += (item.time - lastTime)
+
+        } else {
+          lastTime = 0
+          lastValue = -1
+          lastLen = 0
+        }
+        lastValue = item.value
+        lastLen = item.len
+      })
+      (kv._1, retMap)
+    })
+  }
 
 
   /*
     Get the interval distribution of updating a key with the same value
    */
-  override def getUpdateSameIntervalDistribution(poolName: String, filterOfKey: String, minLen: Int, maxLen: Int) = {}
-
+  override def getUpdateSameIntervalDistribution(poolName: String, filterOfKey: String, start: Double, end: Double) = {
+    val ret = getUpdateSameDistributionData(poolName, filterOfKey).flatMap(kv => kv._2)
+      .map(kv => (kv._1,kv._2.map(d => (kv._1,d)))).flatMap(_._2)
+    ret.map(kv => (Magic.truncateAt(kv._2, precision), 1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+  }
+  def showUpdateSameIntervalDistribution(poolName: String, filterOfKey: String, start: Double, end: Double) = {
+    var buff = "%table Interval\tCount"
+    getUpdateSameIntervalDistribution(poolName, filterOfKey, start, end).foreach(item=>buff += s"\n${item._1}\t${item._2}")
+    println(buff)
+  }
   /*
     4. Some operation to support spark SQL
    */
@@ -320,8 +594,8 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
 
   def getLen(tokens: Array[String]):Int = {
     tokens(POS_TYPE) match  {
-      case "VALUE" => tokens(POS_GET_LEN).toInt
-      case "set" => tokens(POS_SET_LEN).toInt
+      case "VALUE" => string2Int(tokens(POS_GET_LEN))
+      case "set" => string2Int(tokens(POS_SET_LEN))
       case _ => 0
     }
   }
@@ -378,7 +652,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
           )
           hAdm.createTable(tableDesc)
         } catch {
-          case e: TableExistsException => {}
+          case _:Throwable => {}
         }
       }
 
@@ -400,6 +674,10 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
 
 
 object Magic {
+  def truncateAt(n: Double, p: Int): Double = { val s = math pow (10, p); (math floor n * s) / s }
+  def roundAt(p: Int)(n: Double): Double = { val s = math pow (10, p); (math round n * s) / s }
+  def ceilAt(p: Int)(n: Double): Double = { val s = math pow (10, p); (math ceil  n * s) / s }
+
   def main(args: Array[String]) {
     if (args.length<1){
       println("Error, usage: dataFilename [poolInfoFileName] [filterOfKey] [poolName]")
@@ -429,17 +707,16 @@ object Magic {
 
     //reduce the
     println("*******result is ******************")
-    System.out.println("hitRate = " + magic.getGetsHitRate("", filter))
+    System.out.println("hitRate = " + magic.getGetsHitRate("", filter, 0, 4*1024*1024))
     System.out.println("valueLen = " + magic.getValueLenDistribution(filter).mkString(","))
     magic.createTable()
     //magic.sql("select * from magic where len > 1000 limit 500")
     //println("poolInfo is : " + magic.poolInfo.mkString(","))
 
-    magic.writeHbase(tableName,poolName, filter)
+    //magic.writeHbase(tableName,poolName, filter)
 
     val endTime = new Date()
     System.out.println("###used time: "+(endTime.getTime()-startTime.getTime())+"ms. ###")
-
 
   }
 }

@@ -140,8 +140,13 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
   def filterExec(tbl: Table, poolNameFilter: String = "", filterOfKey: String = "", minLen: Int=0, maxLen: Int=4*1024*1024):Boolean = {
     var ret = true
 
-    if (poolNameFilter.length > 0 && poolNameFilter != "all")
-      ret &&= tbl.poolName == poolNameFilter
+    if (poolNameFilter.length > 0 && poolNameFilter != "all") {
+      if (poolNameFilter.startsWith("/") && poolNameFilter.endsWith("/") && poolNameFilter.length >= 2) {
+        ret &&= tbl.poolName.matches(poolNameFilter.substring(1, poolNameFilter.length - 1))
+      } else {
+        ret &&= tbl.poolName.contains(poolNameFilter)
+      }
+    }
 
     if (filterOfKey.length > 0 && filterOfKey != "all") {
       if (filterOfKey.startsWith("/") && filterOfKey.endsWith("/") && filterOfKey.length >= 2) {

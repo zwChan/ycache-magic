@@ -19,7 +19,7 @@ import org.apache.hadoop.hbase.util._
  * @param files The output of "ymemcap"
  * @param poolInfoPath The output of "yconsole ls"
  */
-class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Serializable with MagicIntf{
+class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="")  extends Serializable with MagicIntf{
   /*
      0. init
     */
@@ -37,12 +37,34 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
   def POS_SRC  = 2
   def POS_TYPE = 3
   def POS_MIN = 11
-  def precision = 1
 
-  private val sqlContext = new org.apache.spark.sql.SQLContext(sc)
-  val tableRdd = sc.textFile(files,7).flatMap(_.split("\n"))
-    .map(_.split(" ")).filter(_.length>=POS_MIN)
-    .map(tokens => {
+  // precision of time when out put as X-axis
+  var precision = 1
+  var minPartition = 7
+
+  var startTime = "1970/01/01 00:00:00"
+  var endTime = "2018/01/01 00:00:00"
+
+  var outputLimit = Int.MaxValue
+
+  def str2ts(s: String): Double = {
+    try {
+      val format = new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+      format.parse(s).getTime / 1000
+    } catch {
+      case _: Throwable => println(s"** Input date format is invalid: ${s}"); 0
+    }
+  }
+
+  @transient private val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+  var tableRdd: RDD[Table] = null
+
+  def load() = {
+    val startTs = str2ts(startTime)
+    val endTs = str2ts(endTime)
+    tableRdd = sc.textFile(files, minPartition).flatMap(_.split("\n"))
+      .map(_.split(" ")).filter(_.length >= POS_MIN)
+      .map(tokens => {
       def getPoolNameByIpPort(ipPort: String): String = {
         if (poolInfo != null && ipPort != null) {
           for ((k, v) <- poolInfo) {
@@ -51,22 +73,22 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
         }
         null
       }
-      def getPoolName(tks: Array[String]):String = {
+      def getPoolName(tks: Array[String]): String = {
         val p = getPoolNameByIpPort(tks(POS_DST).trim) //use server-ip and port
-          if (p == null) {
-            val p2 = getPoolNameByIpPort(getIp(tks(POS_SRC))+":") //use client-ip only
-            if (p2 == null)
-              return "default"
-            else
-              return p2
-          } else {
-            p
-          }
+        if (p == null) {
+          val p2 = getPoolNameByIpPort(getIp(tks(POS_SRC)) + ":") //use client-ip only
+          if (p2 == null)
+            return "default"
+          else
+            return p2
+        } else {
+          p
+        }
       }
-      def getIp(ipPort: String):String=ipPort.split(":")(0)
-      def getPort(ipPort: String):Int=string2Int(ipPort.split(":")(1))
-      def getKey(tokens: Array[String]):String = {
-        tokens(POS_TYPE) match  {
+      def getIp(ipPort: String): String = ipPort.split(":")(0)
+      def getPort(ipPort: String): Int = string2Int(ipPort.split(":")(1))
+      def getKey(tokens: Array[String]): String = {
+        tokens(POS_TYPE) match {
           case "get" | "GET" => tokens(POS_GET_KEY)
           case "set" | "SET" | "add" | "ADD" => tokens(POS_SET_KEY)
           case "delete" | "DELETE" => tokens(POS_GET_KEY)
@@ -74,31 +96,31 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
           case _ => ""
         }
       }
-      def getFlag(tokens: Array[String]):Long = {
-        tokens(POS_TYPE) match  {
-          case "get" | "GET"  => string2Int(tokens(POS_GET_FLG))
+      def getFlag(tokens: Array[String]): Long = {
+        tokens(POS_TYPE) match {
+          case "get" | "GET" => string2Int(tokens(POS_GET_FLG))
           case "set" | "SET" | "add" | "ADD" => string2Long(tokens(POS_SET_FLG))
           case _ => 0
         }
       }
-      def getExpire(tokens: Array[String]):Long = {
-        tokens(POS_TYPE) match  {
+      def getExpire(tokens: Array[String]): Long = {
+        tokens(POS_TYPE) match {
           case "set" | "SET" | "add" | "ADD" => string2Long(tokens(POS_SET_EXP))
           case _ => 0
         }
       }
-    def getResult(tokens: Array[String]):String = {
-      tokens(POS_TYPE) match  {
-        case "get" | "GET" => tokens(POS_GET_RET)
-        case "set" | "SET" | "add" | "ADD" => tokens(POS_SET_RET)
-        case "delete" | "DELETE" =>tokens(POS_SET_RET)
-        case "incr" | "decr" | "touch" => tokens(POS_SET_RET)
-        case _ => ""
+      def getResult(tokens: Array[String]): String = {
+        tokens(POS_TYPE) match {
+          case "get" | "GET" => tokens(POS_GET_RET)
+          case "set" | "SET" | "add" | "ADD" => tokens(POS_SET_RET)
+          case "delete" | "DELETE" => tokens(POS_SET_RET)
+          case "incr" | "decr" | "touch" => tokens(POS_SET_RET)
+          case _ => ""
+        }
       }
-    }
 
-    if(tokens.length>POS_TYPE) {
-        Table(Magic.truncateAt(tokens(0).toDouble,6),
+      if (tokens.length > POS_TYPE) {
+        Table(Magic.truncateAt(tokens(0).toDouble, 6),
           getPoolName(tokens),
           getIp(tokens(POS_DST)),
           getPort(tokens(POS_DST)),
@@ -113,10 +135,10 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
           getResult(tokens)
         )
       } else {
-        Table(0,"","",0,"",0,"",0,0,0,0,"","")
+        Table(0, "", "", 0, "", 0, "", 0, 0, 0, 0, "", "")
       }
-  }).persist()
-  
+    }).filter(r => r.time >= startTs && r.time <= endTs).persist()
+  }
   def string2Int(s: String, default: Int=0):Int = {
     try {
       s.toInt
@@ -131,6 +153,17 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
       case e: Exception => println(s"string2Long error: ${s}"); default
     }
   }
+  def strMatch(originString: String, filter: String): Boolean = {
+    if (filter.length > 0 && filter != "all") {
+      if (filter.startsWith("/") && filter.endsWith("/") && filter.length >= 2) {
+        originString.matches(filter.substring(1, filter.length - 1))
+      } else {
+        originString.contains(filter)
+      }
+    } else {
+      true
+    }
+  }
   /*
     Normalize the filter.
     if format is  /***/, used as *** a regular expression
@@ -139,22 +172,8 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
    */
   def filterExec(tbl: Table, poolNameFilter: String = "", filterOfKey: String = "", minLen: Int=0, maxLen: Int=4*1024*1024):Boolean = {
     var ret = true
-
-    if (poolNameFilter.length > 0 && poolNameFilter != "all") {
-      if (poolNameFilter.startsWith("/") && poolNameFilter.endsWith("/") && poolNameFilter.length >= 2) {
-        ret &&= tbl.poolName.matches(poolNameFilter.substring(1, poolNameFilter.length - 1))
-      } else {
-        ret &&= tbl.poolName.contains(poolNameFilter)
-      }
-    }
-
-    if (filterOfKey.length > 0 && filterOfKey != "all") {
-      if (filterOfKey.startsWith("/") && filterOfKey.endsWith("/") && filterOfKey.length >= 2) {
-        ret &&= tbl.key.matches(filterOfKey.substring(1, filterOfKey.length - 1))
-      } else {
-        ret &&= tbl.key.contains(filterOfKey)
-      }
-    }
+    ret &&= strMatch(tbl.poolName, poolNameFilter)
+    ret &&= strMatch(tbl.key, filterOfKey)
     ret &&= tbl.len >= minLen && tbl.len <= maxLen
     ret
   }
@@ -251,7 +270,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
    */
   override def getValueLenDistribution(poolName: String, filterOfKey: String="", minLen: Int=0, maxLen: Int=4*1024*1024) = {
     getValueLenRdd(poolName, filterOfKey, minLen, maxLen).map(tokens =>(tokens.len,1L)).
-      reduceByKey(_+_).sortByKey().collect().toSeq
+      reduceByKey(_+_).sortByKey().take(outputLimit).toSeq
   }
 
   def showValueLenDistribution(poolName: String, filterOfKey: String="", unique: Boolean=false, minLen: Int=0, maxLen: Int=4*1024*1024) = {
@@ -269,12 +288,12 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
     /** XXX: (t.value*4*1024*1024 + t.len, t.len) => suposed that if the checksum of the value && the length of the value is equal,
       * then the value is equal.*/
     getValueLenRdd(poolName, filterOfKey, minLen, maxLen).map(t => (t.value*4*1024*1024 + t.len, t.len)).reduceByKey((v1,v2) => (v1+v2)/2)
-      .map(vLen => (vLen._2, 1L)).reduceByKey(_+_).collect().toSeq
+      .map(vLen => (vLen._2, 1L)).reduceByKey(_+_).take(outputLimit).toSeq
   }
 
   override def getKeyLenDistribution(poolName: String, filterOfKey: String="", minKeyLen: Int=0, maxKeyLen: Int=250) = {
     tableRdd.filter(tbl => filterExec(tbl, poolName, filterOfKey) && tbl.key.length >= minKeyLen && tbl.key.length <= maxKeyLen)
-      .map(tokens =>(tokens.key.length,1L)).reduceByKey(_+_).sortByKey().collect().toSeq
+      .map(tokens =>(tokens.key.length,1L)).reduceByKey(_+_).sortByKey().take(outputLimit).toSeq
   }
 
   def showKeyLenDistribution(poolName: String, filterOfKey: String="", unique: Boolean=false, minKeyLen: Int=0, maxKeyLen: Int=250) = {
@@ -291,14 +310,14 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
   override def getUniqueKeyLenDistribution(poolName: String, filterOfKey: String, minKeyLen: Int=0, maxKeyLen: Int=250) = {
     tableRdd.filter(tbl => filterExec(tbl, poolName, filterOfKey) && tbl.key.length >= minKeyLen && tbl.key.length <= maxKeyLen)
       .map(t => (t.key, t.key.length)).reduceByKey((v1,v2) => (v1+v2)/2)
-      .map(kLen => (kLen._2, 1L)).reduceByKey(_+_).collect().toSeq
+      .map(kLen => (kLen._2, 1L)).reduceByKey(_+_).take(outputLimit).toSeq
   }
 
   override def getExpireDistribution(poolName: String, filterOfKey: String, minExp: Long, maxExp: Long) = {
     getExpireRdd(poolName, filterOfKey).filter(tokens =>
         tokens.expire >= minExp && tokens.expire <= maxExp
         ).map(tokens =>(tokens.expire,1L)
-      ).reduceByKey(_+_).sortByKey().collect().toSeq
+      ).reduceByKey(_+_).sortByKey().take(outputLimit).toSeq
   }
   def showExpireDistribution(poolName: String, filterOfKey: String="", unique: Boolean=false, minExp: Long=0, maxExp: Long=60*60*24*30) = {
     var buff = ""
@@ -315,7 +334,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
       tokens.expire >= minExp && tokens.expire <= maxExp
     ).map(t => (t.key, t.expire)).reduceByKey((v1,v2) => (v1+v2)/2)
       .map(kExp => (kExp._2, 1L))
-      .reduceByKey(_+_).sortByKey().collect().toSeq
+      .reduceByKey(_+_).sortByKey().take(outputLimit).toSeq
   }
 
   /*
@@ -325,7 +344,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
   // This distribution tells us if the expire is reasonable
   override def getFirstNGetIntervalDistribution(poolName: String, filterOfKey: String, firstN: Int=1, start: Double, end: Double): Seq[(Double, Long)] = {
     val ret = getFirstNGetIntervalDistributionData(poolName,filterOfKey,firstN).map(_._2.get(firstN)).filter(_.isDefined).flatMap(_.get)
-    ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+    ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().take(outputLimit).toSeq
   }
   def showFirstNGetIntervalDistribution(poolName: String, filterOfKey: String, firstN: Int=1, start: Double, end: Double) = {
     var buff = "%table firstN\tInterval\tCount"
@@ -390,7 +409,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
    */
   override def getLastGetIntervalDistribution(poolName: String, filterOfKey: String, start: Double, end: Double) = {
     val ret = getFirstNGetIntervalDistributionData(poolName,filterOfKey,-1).flatMap(_._2).map(_._2).flatMap(r => r)
-    ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+    ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().take(outputLimit).toSeq
   }
   def showLastGetIntervalDistribution(poolName: String, filterOfKey: String, threshold: Int, start: Double, end: Double) = {
     var buff = "%table Interval\tCount"
@@ -403,7 +422,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
    */
   override def getLifeSpanDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double) = {
     val ret = getFirstNGetIntervalDistributionData(poolName, filterOfKey,0).map(_._2.get(0)).filter(_.isDefined).flatMap(_.get)
-    ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+    ret.map(d => (Magic.truncateAt(d, precision),1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().take(outputLimit).toSeq
   }
   def showLifeSpanDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double) = {
     var buff = "%table LifeSpan\tCount"
@@ -418,7 +437,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
   override def getLifeBenefitDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double)  = {
     val ret = getFirstNGetIntervalDistributionData(poolName, filterOfKey,0).flatMap(kv => kv._2)
       .map(kv => (kv._1,kv._2.map(d => (d,kv._1)))).flatMap(_._2)
-    ret.map(kv => (Magic.truncateAt(kv._1, precision), kv._2*1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+    ret.map(kv => (Magic.truncateAt(kv._1, precision), kv._2*1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().take(outputLimit).toSeq
   }
   def showLifeBenefitDistribution(poolName: String, filterOfKey: String,  start: Double, end: Double) = {
     var buff = "%table LifeSpan\tGetsCount"
@@ -431,7 +450,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
   override def getUpdateSameDistribution(poolName: String, filterOfKey: String,  minCnt: Int, maxCnt: Int) = {
     val ret = getUpdateSameDistributionData(poolName, filterOfKey,0).flatMap(kv => kv._2)
     .map(kv => (kv._1,kv._2.map(d => (kv._1,d)))).flatMap(_._2)
-    ret.map(kv => (kv._1, 1L)).reduceByKey(_+_).sortByKey().filter(kv => kv._1>=minCnt && kv._1 <= maxCnt).collect().toSeq
+    ret.map(kv => (kv._1, 1L)).reduceByKey(_+_).sortByKey().filter(kv => kv._1>=minCnt && kv._1 <= maxCnt).take(outputLimit).toSeq
   }
   def showUpdateSameDistribution(poolName: String, filterOfKey: String,  minCnt: Int, maxCnt: Int) = {
     var buff = "%table repeatTimes\tCount"
@@ -485,7 +504,7 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
    */
   override def getUpdateSameIntervalDistribution(poolName: String, filterOfKey: String, start: Double, end: Double) = {
     val ret = getUpdateSameDistributionData(poolName, filterOfKey,1).flatMap(kv => kv._2).flatMap(_._2);
-    ret.map(i => (Magic.truncateAt(i, precision), 1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().collect().toSeq
+    ret.map(i => (Magic.truncateAt(i, precision), 1L)).reduceByKey(_+_).filter(kv => kv._1>=start && kv._1 <= end).sortByKey().take(outputLimit).toSeq
   }
   def showUpdateSameIntervalDistribution(poolName: String, filterOfKey: String, start: Double, end: Double) = {
     var buff = "%table Interval\tCount"
@@ -543,6 +562,26 @@ class Magic(sc: SparkContext, files: String, poolInfoPath:String="")  extends Se
       case _ => 0
     }
   }
+
+  /**
+   *  5. Show the distribution of error on specified command.
+   */
+  def showErrorDistribution(poolName: String, filterOfKey: String, command: String="all", error: String="ERROR",start: Double, end: Double) = {
+    var buff = "%table Time\tErrorCount"
+    val errorData = tableRdd.filter(t =>
+      strMatch(t.poolName,poolName) &&
+      strMatch(t.key,filterOfKey) &&
+      strMatch(t.command,command) &&
+      strMatch(t.result,error))
+      .filter(t => t.time>=start && t.time <= end)
+      .map(t => (Magic.truncateAt(t.time, precision),1L))
+      .reduceByKey(_+_)
+      .sortByKey()
+      .take(outputLimit)
+    errorData.foreach(item=>buff += s"\n${item._1}\t${item._2}")
+    println(buff)
+  }
+
 
   /**
    * poolInfo is a map key: value=poolname, key: String=ip1:port1,ip2:port2*/
@@ -648,6 +687,7 @@ object Magic {
     //reduce the length of key
 
     val magic = new Magic(sc,dataPath,poolPath)
+    magic.load()
 
     //reduce the
     println("*******result is ******************")

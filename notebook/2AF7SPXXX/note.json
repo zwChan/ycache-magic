@@ -1,0 +1,1784 @@
+{
+  "paragraphs": [
+    {
+      "text": "%md\n###1. Initialize the Cache Magic, and show the basic statistics\nPlease specify:  \n**[cache file]:** which is got used Ycap; \n**[pool Info file](optional):** which tell Magic that server/client IpPort belong to the pools. Both file should be in Hdfs.\n__the format of poolInfo file is like(each line a pool,):__\npoolname1 ip1:port1,ip2:port2,ip3:port3,...,\npoolname2 ip1:port1,ip2:port2,ip3:port3,...,\n**The filter condition:**\n**[filter of key]**: A filter for key. if the format is /reg exp/, it match as a regular expression; otherwise match as sub-string.\n**[poolname]**: A filter for poolName. if the format is /reg exp/, it match as a regular expression; otherwise match as sub-string.\n\n\n",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1426735513871_-1473443251",
+      "id": "20150319-112513_1295433570",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch3\u003e1. Initialize the Cache Magic, and show the basic statistics\u003c/h3\u003e\n\u003cp\u003ePlease specify:\n\u003cbr  /\u003e\u003cstrong\u003e[cache file]:\u003c/strong\u003e which is got used Ycap;\n\u003cbr  /\u003e\u003cstrong\u003e\u003ca href\u003d\"optional\"\u003epool Info file\u003c/a\u003e:\u003c/strong\u003e which tell Magic that server/client IpPort belong to the pools. Both file should be in Hdfs.\n\u003cbr  /\u003e\u003cstrong\u003ethe format of poolInfo file is like(each line a pool,):\u003c/strong\u003e\n\u003cbr  /\u003epoolname1 ip1:port1,ip2:port2,ip3:port3,\u0026hellip;,\n\u003cbr  /\u003epoolname2 ip1:port1,ip2:port2,ip3:port3,\u0026hellip;,\n\u003cbr  /\u003e\u003cstrong\u003eThe filter condition:\u003c/strong\u003e\n\u003cbr  /\u003e\u003cstrong\u003e[filter of key]\u003c/strong\u003e: A filter for key. if the format is /reg exp/, it match as a regular expression; otherwise match as sub-string.\n\u003cbr  /\u003e\u003cstrong\u003e[poolname]\u003c/strong\u003e: A filter for poolName. if the format is /reg exp/, it match as a regular expression; otherwise match as sub-string.\u003c/p\u003e\n"
+      },
+      "dateCreated": "Mar 19, 2015 11:25:13 AM",
+      "dateStarted": "Mar 23, 2015 5:48:26 PM",
+      "dateFinished": "Mar 23, 2015 5:48:27 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Init a magic instance with yCap and poolInfo files in hadoop",
+      "text": "import com.yhd.ycache.magic._\nval magic \u003d new Magic(sc,z.input(\"cache file\",\"hdfs://heju:8020/user/root/magic/log.0318\").toString,z.input(\"pool Info\",\"hdfs://heju:8020/user/root/magic/poolInfo.txt\").toString)   \nmagic.startTime \u003d z.input(\"start time\",\"1970/01/01 12:00:00\").toString\nmagic.endTime   \u003d z.input(\"end time\",\"2016/01/01 12:00:00\").toString\nmagic.precision \u003d z.input(\"precision\",\"1\").toString.toInt\nmagic.outputLimit \u003d z.input(\"outputLimit\",\"1000000\").toString.toInt\nmagic.load()\nmagic.createTable()\n/*\nprintln(\"spark.cores.max\")\nsys.props.get(\"spark.cores.max\").get\nprintln(\"spark-master\")\nsys.env.get(\"MASTER\")\nprintln(\"CLASSPATH\")\nSystem.getenv().get(\"CLASSPATH\")\nprintln(\"ADD_JARS\")\nSystem.getenv().get(\"ADD_JARS\")\n\"\"\n*/",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": true,
+        "tableHide": false,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "cache file": "hdfs://heju:8020/user/root/magic/log.0318",
+          "pool Info": "hdfs://heju:8020/user/root/magic/poolInfo.txt",
+          "end time": "2016/01/01 12:00:00",
+          "outputLimit": "1000000",
+          "precision": "1",
+          "start time": "1970/01/01 00:00:00"
+        },
+        "forms": {
+          "cache file": {
+            "name": "cache file",
+            "displayName": "cache file",
+            "defaultValue": "hdfs://heju:8020/user/root/magic/log.0318",
+            "hidden": false
+          },
+          "pool Info": {
+            "name": "pool Info",
+            "displayName": "pool Info",
+            "defaultValue": "hdfs://heju:8020/user/root/magic/poolInfo.txt",
+            "hidden": false
+          },
+          "start time": {
+            "name": "start time",
+            "displayName": "start time",
+            "defaultValue": "1970/01/01 12:00:00",
+            "hidden": false
+          },
+          "end time": {
+            "name": "end time",
+            "displayName": "end time",
+            "defaultValue": "2016/01/01 12:00:00",
+            "hidden": false
+          },
+          "precision": {
+            "name": "precision",
+            "displayName": "precision",
+            "defaultValue": "1",
+            "hidden": false
+          },
+          "outputLimit": {
+            "name": "outputLimit",
+            "displayName": "outputLimit",
+            "defaultValue": "1000000",
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1423626130882_745506423",
+      "id": "20150211-114210_210269919",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "import com.yhd.ycache.magic._\nmagic: com.yhd.ycache.magic.Magic \u003d com.yhd.ycache.magic.Magic@acbc025\nmagic.startTime: String \u003d 1970/01/01 00:00:00\nmagic.endTime: String \u003d 2016/01/01 12:00:00\nmagic.precision: Int \u003d 1\nmagic.outputLimit: Int \u003d 1000000\n####################\nTable name is :magic\nschema is:\nroot\n |-- time: double (nullable \u003d false)\n |-- poolName: string (nullable \u003d true)\n |-- serverIp: string (nullable \u003d true)\n |-- serverPort: integer (nullable \u003d false)\n |-- clientIp: string (nullable \u003d true)\n |-- clientPort: integer (nullable \u003d false)\n |-- command: string (nullable \u003d true)\n |-- flag: long (nullable \u003d false)\n |-- expire: long (nullable \u003d false)\n |-- len: integer (nullable \u003d false)\n |-- value: long (nullable \u003d false)\n |-- key: string (nullable \u003d true)\n |-- result: string (nullable \u003d true)\n\n####################\n"
+      },
+      "dateCreated": "Feb 11, 2015 11:42:10 AM",
+      "dateStarted": "Mar 23, 2015 6:12:07 PM",
+      "dateFinished": "Mar 23, 2015 6:12:23 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "basic statistics",
+      "text": "\n\nmagic.showStats(z.input(\"poolname\",\"all\").toString,z.input(\"filter Of KEY\",\"all\").toString,z.input(\"min length\",0).toString.toFloat.toInt,z.input(\"max length\",4*1024*1024).toString.toDouble.toInt)\n//magic.getGets(\"\",\"\",0,40000000)\n//magic.getGetsHits(\"\",\"\",0,40000000)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Items",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Values",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Items",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Values",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "title": true,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {
+          "filter Of KEY": "all",
+          "max length": 4194304.0,
+          "min length": 0.0,
+          "poolname": "sby"
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "min length": {
+            "name": "min length",
+            "displayName": "min length",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max length": {
+            "name": "max length",
+            "displayName": "max length",
+            "defaultValue": 4194304.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1423721599352_-703601146",
+      "id": "20150212-141319_608704088",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Items\tValues\tItems\tValues\n gets\t105\t getHits\t82\n getHitRate\t0.781\t updates\t22\n deletes\t0\t deleteHits\t0\n deleteHitRate\tNaN\t getFails\t0\n updateFails\t0\t deleteFails\t0\n"
+      },
+      "dateCreated": "Feb 12, 2015 2:13:19 PM",
+      "dateStarted": "Mar 23, 2015 5:50:44 PM",
+      "dateFinished": "Mar 23, 2015 5:50:46 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n####2. Show the count of values distribution based on the length of the cache-value. All and Unique(of values)\nX-axis: The length of the value(Int); \nY-axis: the number of the value on the X-axis specified length.",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1426735490624_224843851",
+      "id": "20150319-112450_1933922347",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch4\u003e2. Show the count of values distribution based on the length of the cache-value. All and Unique(of values)\u003c/h4\u003e\n\u003cp\u003eX-axis: The length of the value(Int);\n\u003cbr  /\u003eY-axis: the number of the value on the X-axis specified length.\u003c/p\u003e\n"
+      },
+      "dateCreated": "Mar 19, 2015 11:24:50 AM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:46 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "All With Duplicated Value",
+      "text": " \nmagic.showValueLenDistribution(z.input(\"poolname\",\"all\").toString,z.input(\"filter Of KEY\",\"all\").toString,z.input(\"Unique\",\"false\").toString.toBoolean,z.input(\"min length\",0).toString.toFloat.toInt,z.input(\"max length\",4*1024*1024).toString.toFloat.toInt)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Value-len",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Value-len",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "Unique": "false",
+          "filter Of KEY": "all",
+          "max length of VALUE": 4194304.0,
+          "min length of VALUE": 0.0,
+          "poolname": "all",
+          "max length": "22",
+          "min length": "1",
+          "filter-Of-KEY": "all",
+          "filter Of KEY\t": "all",
+          "filter Of KEY\n": "all"
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "Unique": {
+            "name": "Unique",
+            "displayName": "Unique",
+            "defaultValue": "false",
+            "hidden": false
+          },
+          "min length": {
+            "name": "min length",
+            "displayName": "min length",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max length": {
+            "name": "max length",
+            "displayName": "max length",
+            "defaultValue": 4194304.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1426734868496_1767782174",
+      "id": "20150319-111428_1067805246",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Value-len\tCount\n1\t41\n2\t7\n3\t124\n4\t2850\n5\t17\n6\t1\n7\t13\n8\t2033\n9\t1248\n10\t3\n11\t124\n12\t9\n13\t2\n15\t29\n16\t68\n17\t25\n19\t41\n21\t1\n"
+      },
+      "dateCreated": "Mar 19, 2015 11:14:28 AM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:49 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "Unique Value (The Checksum And Length Are Equal)",
+      "text": "\nmagic.showValueLenDistribution(z.input(\"poolname\",\"all\").toString,z.input( \"filter Of KEY\",\"all\").toString,z.input(\"Unique\",\"false\").toString.toBoolean,z.input(\"min length\",0).toString.toFloat.toInt,z.input(\"max length\",4*1024*1024).toString.toFloat.toInt)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 288.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Value-len",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Value-len",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "tableHide": false,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "max_len": "500",
+          "min_len": "300",
+          "filterOfKey": "pss",
+          "max length of VALUE": "100000",
+          "min length of VALUE": "0",
+          "filter Of KEY": "all",
+          "poolname": "all",
+          "Unique": "true",
+          "max length": "10",
+          "min length": "0"
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "Unique": {
+            "name": "Unique",
+            "displayName": "Unique",
+            "defaultValue": "false",
+            "hidden": false
+          },
+          "min length": {
+            "name": "min length",
+            "displayName": "min length",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max length": {
+            "name": "max length",
+            "displayName": "max length",
+            "defaultValue": 4194304.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1423637864276_-1415220230",
+      "id": "20150211-145744_1832030984",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Value-len\tCount\n7\t2\n1\t2\n8\t2\n9\t2\n2\t2\n3\t2\n10\t1\n4\t2\n5\t2\n6\t1\n"
+      },
+      "dateCreated": "Feb 11, 2015 2:57:44 PM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:49 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n###3. Show the count of keys distribution based on the length of the cache-key. All and Unique (of keys)\nX-axis: The length of the key(Int, (0,250]); \nY-axis: the number of the keys on the X-axis specified length.",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1426735729776_-582994734",
+      "id": "20150319-112849_886224033",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch3\u003e3. Show the count of keys distribution based on the length of the cache-key. All and Unique (of keys)\u003c/h3\u003e\n\u003cp\u003eX-axis: The length of the key(Int, (0,250]);\n\u003cbr  /\u003eY-axis: the number of the keys on the X-axis specified length.\u003c/p\u003e\n"
+      },
+      "dateCreated": "Mar 19, 2015 11:28:49 AM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:46 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "all with duplicated keys",
+      "text": "magic.showKeyLenDistribution(z.input(\"poolName\",\"all\" ).toString,z.input(\"filter Of KEY\",\"\").toString,z.input(\"Unique\",\"false\").toString.toBoolean,z.input(\"min key\",0).toString.toFloat.toInt,z.input(\"max key\",250).toString.toFloat.toInt)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Key-len",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Key-len",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "tableHide": false,
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "name": "",
+          "max length of KEY": "250",
+          "min length of KEY": "0",
+          "filter Of KEY": "all",
+          "poolName": "all",
+          "Unique": "false",
+          "max length": "2500",
+          "min length": 0.0,
+          "max key": "60",
+          "min key": "30"
+        },
+        "forms": {
+          "poolName": {
+            "name": "poolName",
+            "displayName": "poolName",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "",
+            "hidden": false
+          },
+          "Unique": {
+            "name": "Unique",
+            "displayName": "Unique",
+            "defaultValue": "false",
+            "hidden": false
+          },
+          "min key": {
+            "name": "min key",
+            "displayName": "min key",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max key": {
+            "name": "max key",
+            "displayName": "max key",
+            "defaultValue": 250.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1423641221082_-1633377266",
+      "id": "20150211-155341_742852590",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Key-len\tCount\n30\t51\n31\t144\n32\t11157\n33\t37730\n34\t6493\n35\t19591\n36\t964\n37\t148\n38\t98\n39\t5647\n40\t18284\n41\t6766\n42\t9827\n43\t634\n44\t202\n45\t55\n46\t68\n47\t183\n48\t71\n49\t179\n50\t588\n51\t480\n52\t298\n53\t1541\n54\t1527\n55\t50\n56\t81\n57\t55\n58\t36\n59\t26\n60\t51\n"
+      },
+      "dateCreated": "Feb 11, 2015 3:53:41 PM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:49 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "unique keys",
+      "text": " magic.showKeyLenDistribution(z.input(\"poolName\",\"all\").toString, z.input(\"filter Of KEY\",\"\").toString,z.input(\"Unique\",\"false\").toString.toBoolean,z.input(\"min key\",0).toString.toFloat.toInt,z.input(\"max key\",250).toString.toFloat.toInt)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Key-len",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Key-len",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "Unique": "true",
+          "max length of KEY": 250.0,
+          "min length of KEY": 0.0,
+          "poolName": "all",
+          "filter Of KEY": "all",
+          "max length": 4194304.0,
+          "min length": 0.0,
+          "max key": "60",
+          "min key": "30"
+        },
+        "forms": {
+          "poolName": {
+            "name": "poolName",
+            "displayName": "poolName",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "",
+            "hidden": false
+          },
+          "Unique": {
+            "name": "Unique",
+            "displayName": "Unique",
+            "defaultValue": "false",
+            "hidden": false
+          },
+          "min key": {
+            "name": "min key",
+            "displayName": "min key",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max key": {
+            "name": "max key",
+            "displayName": "max key",
+            "defaultValue": 250.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1426735098606_330081160",
+      "id": "20150319-111818_1643283409",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Key-len\tCount\n56\t64\n35\t8238\n42\t8143\n49\t35\n50\t316\n36\t189\n57\t29\n43\t306\n30\t9\n51\t236\n37\t44\n58\t16\n44\t56\n52\t92\n59\t11\n45\t25\n38\t46\n31\t41\n39\t2475\n53\t246\n46\t40\n32\t2473\n60\t15\n47\t32\n54\t94\n33\t11838\n40\t11693\n41\t2317\n34\t2345\n55\t12\n48\t34\n"
+      },
+      "dateCreated": "Mar 19, 2015 11:18:18 AM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:50 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n###4. Show the count of keys distribution based on the expire . All and Unique (of keys)\nX-axis: The expire of the keys. (Int, [0,30 days]); \nY-axis: the number of the keys on the X-axis specified length.",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1426735762056_-997171730",
+      "id": "20150319-112922_1100669309",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch3\u003e4. Show the count of keys distribution based on the expire . All and Unique (of keys)\u003c/h3\u003e\n\u003cp\u003eX-axis: The expire of the keys. (Int, [0,30 days]);\n\u003cbr  /\u003eY-axis: the number of the keys on the X-axis specified length.\u003c/p\u003e\n"
+      },
+      "dateCreated": "Mar 19, 2015 11:29:22 AM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:46 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "all with duplicated keys",
+      "text": "\nmagic.showExpireDistribution(z.input(\"poolname\",\"all\" ).toString,z.input(\"filter Of KEY\",\"all\").toString,z.input(\"Unique\",\"false\").toString.toBoolean,z.input(\"min expire\",0).toString.toFloat.toInt,z.input(\"max expire\",60*60*24*30).toString.toFloat.toInt)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Expire",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Expire",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "tableHide": false,
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "max length of EXPIRE": "20000",
+          "min length of EXPIRE": "0",
+          "filter Of KEY": "all",
+          "poolname": "all",
+          "Unique": "false",
+          "max length": 2592000.0,
+          "min length": 0.0,
+          "max length of expire": 2592000.0,
+          "max expire": "2222222",
+          "min expire": 0.0
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "Unique": {
+            "name": "Unique",
+            "displayName": "Unique",
+            "defaultValue": "false",
+            "hidden": false
+          },
+          "min expire": {
+            "name": "min expire",
+            "displayName": "min expire",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max expire": {
+            "name": "max expire",
+            "displayName": "max expire",
+            "defaultValue": 2592000.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1423642314899_373648141",
+      "id": "20150211-161154_18527224",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Expire\tCount\n60\t131\n120\t5\n180\t22\n300\t155\n360\t7\n600\t104\n900\t6\n960\t3\n1020\t3\n1080\t2\n1140\t4\n1200\t9\n1260\t2\n1320\t4\n1380\t3\n1440\t3\n1500\t19\n1560\t4\n1620\t4\n1680\t1\n1740\t3\n1800\t1146\n2100\t5073\n2700\t99\n3600\t39961\n5400\t1\n7200\t111\n10800\t8\n14400\t125\n18000\t35\n21600\t14\n28800\t9\n43200\t109\n45960\t1\n47820\t1\n72000\t1\n86400\t1524\n259200\t2\n604800\t1\n1296000\t1\n"
+      },
+      "dateCreated": "Feb 11, 2015 4:11:54 PM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:50 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "unique keys",
+      "text": "magic.showExpireDistribution(z.input(\"poolname\",\"all\").toString,z.input(\"filter Of KEY\",\"all\").toString,z.input(\"Unique\",\"false\").toString.toBoolean,z.input(\"min expire\",0).toString.toFloat.toInt,z.input(\"max expire\",60*60*24*30).toString.toFloat.toInt)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Expire",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Expire",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "Unique": "true",
+          "filter Of KEY": "all",
+          "max length of EXPIRE": 2592000.0,
+          "min length of EXPIRE": 0.0,
+          "poolname": "all",
+          "max length": 2592000.0,
+          "min length": 0.0,
+          "max length of expire": 2592000.0,
+          "max expire": "1111",
+          "min expire": 0.0
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "Unique": {
+            "name": "Unique",
+            "displayName": "Unique",
+            "defaultValue": "false",
+            "hidden": false
+          },
+          "min expire": {
+            "name": "min expire",
+            "displayName": "min expire",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max expire": {
+            "name": "max expire",
+            "displayName": "max expire",
+            "defaultValue": 2592000.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1426735830400_-859523569",
+      "id": "20150319-113030_662376737",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Expire\tCount\n60\t105\n120\t5\n180\t15\n300\t140\n360\t7\n600\t95\n900\t5\n960\t3\n1020\t3\n1080\t2\n"
+      },
+      "dateCreated": "Mar 19, 2015 11:30:30 AM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:51 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n####5. Show the count of command distribution based on the interval between \u0027update\u0027 and first-N(or last) \u0027get\u0027 the same key . \nX-axis: The interval of two command; \nY-axis: the number of the command-pairs on the X-axis specified interval.",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1426745480759_-1567700825",
+      "id": "20150319-141120_962077578",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch4\u003e5. Show the count of command distribution based on the interval between \u0027update\u0027 and first-N(or last) \u0027get\u0027 the same key .\u003c/h4\u003e\n\u003cp\u003eX-axis: The interval of two command;\n\u003cbr  /\u003eY-axis: the number of the command-pairs on the X-axis specified interval.\u003c/p\u003e\n"
+      },
+      "dateCreated": "Mar 19, 2015 2:11:20 PM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:46 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "\"Update\" and first-N \"gets\"",
+      "text": " \n magic.showFirstNGetIntervalDistribution(z.input(\"poolname\",\"all\").toString,z.input(\"filter Of KEY\",\"all\").toString,z.input(\"firstN\",1).toString.toFloat.toInt,z.input(\"min interval\",0).toString.toDouble,z.input(\"max interval\",4*1024*1024).toString.toDouble)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Interval",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 2.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [
+            {
+              "name": "firstN",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "scatter": {
+            "xAxis": {
+              "name": "firstN",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Interval",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "filter Of KEY": "all",
+          "firstN": "1",
+          "poolname": "all",
+          "max length of EXPIRE": 2592000.0,
+          "min length of EXPIRE": 0.0,
+          "max length": 4194304.0,
+          "min length": 0.0,
+          "max interval": "5",
+          "min interval": 0.0
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "firstN": {
+            "name": "firstN",
+            "displayName": "firstN",
+            "defaultValue": 1.0,
+            "hidden": false
+          },
+          "min interval": {
+            "name": "min interval",
+            "displayName": "min interval",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max interval": {
+            "name": "max interval",
+            "displayName": "max interval",
+            "defaultValue": 4194304.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1426745775111_1132495960",
+      "id": "20150319-141615_204629152",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "firstN\tInterval\tCount\n1\t0.0\t86\n1\t0.1\t27\n1\t0.2\t32\n1\t0.3\t56\n1\t0.4\t52\n1\t0.5\t43\n1\t0.6\t55\n1\t0.7\t66\n1\t0.8\t257\n1\t0.9\t6\n1\t1.0\t1\n1\t1.1\t7\n1\t1.2\t2\n1\t1.3\t3\n1\t1.4\t1\n1\t1.5\t3\n1\t1.6\t3\n1\t1.7\t2\n1\t1.9\t1\n1\t2.1\t2\n1\t2.2\t9\n1\t2.3\t1\n1\t2.5\t2\n1\t2.8\t1\n1\t3.0\t1\n1\t3.2\t4\n1\t3.3\t1\n1\t3.4\t1\n1\t3.6\t1\n1\t3.8\t7\n1\t3.9\t4\n1\t4.1\t2\n1\t4.2\t1\n1\t4.3\t3\n1\t4.4\t4\n1\t4.5\t3\n1\t4.7\t5\n1\t4.8\t1\n1\t4.9\t1\n"
+      },
+      "dateCreated": "Mar 19, 2015 2:16:15 PM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:52 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "\"Update\" and last-\"Gets\"",
+      "text": "\n magic.showLastGetIntervalDistribution(z.input(\"poolname\",\"all\").toString,z.input(\"filter Of KEY\",\"all\").toString,0,z.input(\"min interval\",0).toString.toDouble,z.input(\"max interval\",4*1024*1024).toString.toDouble)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Interval",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Interval",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "tableHide": false,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "filter Of KEY": "all",
+          "poolname": "all",
+          "max length of EXPIRE": 2592000.0,
+          "min length of EXPIRE": 0.0,
+          "max length": 4194304.0,
+          "min length": 0.0,
+          "max interval": 4194304.0,
+          "min interval": "0"
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "min interval": {
+            "name": "min interval",
+            "displayName": "min interval",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max interval": {
+            "name": "max interval",
+            "displayName": "max interval",
+            "defaultValue": 4194304.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1426745946705_512743748",
+      "id": "20150319-141906_1524098266",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Interval\tCount\n0.0\t12399\n0.1\t59\n0.2\t41\n0.3\t24\n0.4\t31\n0.5\t30\n0.6\t6\n0.8\t17\n0.9\t2\n1.0\t1\n51.6\t1\n72.1\t1\n127.2\t1\n174.2\t1\n216.1\t1\n243.4\t1\n329.0\t1\n330.2\t1\n333.4\t1\n342.1\t1\n"
+      },
+      "dateCreated": "Mar 19, 2015 2:19:06 PM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:53 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n####6. Show the count of command distribution based on the key\u0027s life span, and how much benifit(gets) it provide . \nX-axis: The interval of keys\u0027 life span; \nY-axis: the number of the keys/\"get\" on the X-axis specified interval.",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1426746205201_407117877",
+      "id": "20150319-142325_1820436667",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch4\u003e6. Show the count of command distribution based on the key\u0027s life span, and how much benifit(gets) it provide .\u003c/h4\u003e\n\u003cp\u003eX-axis: The interval of keys\u0027 life span;\n\u003cbr  /\u003eY-axis: the number of the keys/\u0026ldquo;get\u0026rdquo; on the X-axis specified interval.\u003c/p\u003e\n"
+      },
+      "dateCreated": "Mar 19, 2015 2:23:25 PM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:46 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "number of keys in the lifespan",
+      "text": " magic.showLifeSpanDistribution( z.input(\"poolname\",\"all\" ).toString,z.input(\"filter Of KEY\",\"all\").toString,z.input(\"min interval\",0).toString.toDouble,z.input(\"max interval\",4*1024*1024).toString.toDouble)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "LifeSpan",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "LifeSpan",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "filter Of KEY": "all",
+          "poolname": "all",
+          "max length": 4194304.0,
+          "min length": 0.0,
+          "max interval": "1",
+          "min interval": "0"
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "min interval": {
+            "name": "min interval",
+            "displayName": "min interval",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max interval": {
+            "name": "max interval",
+            "displayName": "max interval",
+            "defaultValue": 4194304.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1426746306305_957213571",
+      "id": "20150319-142506_2134586475",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "LifeSpan\tCount\n0.0\t831\n0.1\t187\n0.2\t108\n0.3\t92\n0.4\t70\n0.5\t62\n0.6\t54\n0.7\t63\n0.8\t47\n0.9\t40\n1.0\t54\n"
+      },
+      "dateCreated": "Mar 19, 2015 2:25:06 PM",
+      "dateStarted": "Mar 23, 2015 10:46:47 AM",
+      "dateFinished": "Mar 23, 2015 10:46:55 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "number of \u0027get\u0027 in the lifespan",
+      "text": "magic.showLifeBenefitDistribution( z.input(\"poolname\",\"all\").toString,z.input(\"filter Of KEY\",\"all\").toString,z.input(\"min interval\",0).toString.toDouble,z.input(\"max interval\",4*1024*1024).toString.toDouble)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "LifeSpan",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "GetsCount",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "LifeSpan",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "GetsCount",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "filter Of KEY": "all",
+          "poolname": "all",
+          "max length": 4194304.0,
+          "min length": 0.0,
+          "max interval": "111111",
+          "min interval": "0"
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "min interval": {
+            "name": "min interval",
+            "displayName": "min interval",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max interval": {
+            "name": "max interval",
+            "displayName": "max interval",
+            "defaultValue": 4194304.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1426746325682_-245680057",
+      "id": "20150319-142525_133078543",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "LifeSpan\tGetsCount\n0.0\t8\n0.1\t9\n0.2\t2\n0.3\t2\n0.4\t3\n0.5\t0\n0.6\t1\n0.7\t5\n0.8\t3\n0.9\t1\n1.0\t6\n1.1\t0\n1.2\t7\n1.3\t2\n1.4\t0\n1.5\t0\n1.6\t0\n1.7\t0\n1.8\t0\n1.9\t0\n2.0\t0\n2.1\t0\n2.2\t3\n2.3\t0\n2.4\t1\n2.5\t0\n2.6\t0\n2.7\t0\n2.8\t1\n2.9\t0\n3.0\t0\n3.1\t0\n3.2\t0\n3.3\t0\n3.4\t0\n3.5\t0\n3.6\t2\n3.7\t0\n3.8\t0\n3.9\t0\n4.0\t0\n4.1\t0\n4.2\t1\n4.3\t2\n4.4\t1\n4.5\t0\n4.6\t0\n4.7\t0\n4.8\t0\n4.9\t2\n5.0\t0\n5.1\t0\n5.2\t0\n5.4\t0\n5.5\t0\n5.6\t1\n5.7\t0\n5.8\t2\n6.2\t1\n6.8\t1\n7.2\t1\n7.3\t1\n7.5\t1\n7.6\t1\n7.7\t1\n7.8\t0\n8.0\t2\n8.1\t0\n8.2\t1\n8.3\t3\n8.4\t2\n8.5\t2\n8.6\t2\n8.7\t1\n8.8\t2\n8.9\t2\n9.0\t3\n9.1\t3\n9.2\t2\n9.3\t4\n9.4\t3\n9.6\t2\n9.7\t2\n9.8\t2\n9.9\t1\n10.0\t2\n10.1\t2\n10.3\t2\n10.4\t4\n10.5\t3\n10.6\t5\n10.7\t3\n10.8\t3\n10.9\t1\n11.0\t6\n11.1\t2\n11.2\t4\n11.3\t2\n11.4\t4\n11.5\t4\n11.6\t9\n11.7\t5\n11.8\t3\n11.9\t8\n12.0\t10\n12.1\t10\n12.2\t6\n12.3\t9\n12.4\t7\n12.5\t9\n12.6\t6\n12.7\t5\n12.8\t5\n12.9\t3\n13.0\t5\n13.1\t5\n13.2\t9\n13.3\t4\n13.4\t2\n13.5\t2\n13.6\t1\n13.7\t3\n13.8\t3\n13.9\t1\n14.0\t3\n14.1\t5\n14.2\t6\n14.3\t1\n14.4\t1\n14.5\t1\n14.6\t1\n14.7\t1\n14.9\t2\n15.0\t5\n15.1\t2\n15.2\t5\n15.3\t4\n15.4\t3\n15.5\t2\n15.6\t5\n15.7\t1\n15.8\t4\n15.9\t3\n16.0\t3\n16.1\t2\n16.2\t1\n16.3\t3\n16.4\t5\n16.5\t4\n16.6\t3\n16.7\t4\n16.8\t6\n17.0\t2\n17.1\t5\n17.2\t3\n17.3\t6\n17.4\t4\n17.5\t5\n17.6\t1\n17.7\t3\n17.8\t2\n17.9\t2\n18.0\t3\n18.2\t2\n18.3\t5\n18.4\t4\n18.5\t3\n18.6\t2\n18.7\t2\n18.8\t2\n18.9\t2\n19.0\t9\n19.2\t3\n19.3\t6\n19.4\t4\n19.5\t1\n19.6\t5\n19.7\t4\n19.8\t5\n19.9\t8\n20.0\t6\n20.1\t4\n20.2\t3\n20.3\t8\n20.4\t6\n20.5\t4\n20.6\t6\n20.7\t5\n20.8\t4\n20.9\t3\n21.0\t7\n21.1\t3\n21.2\t3\n21.3\t6\n21.4\t5\n21.5\t6\n21.6\t2\n21.7\t1\n21.8\t4\n21.9\t3\n22.0\t6\n22.1\t3\n22.2\t2\n22.3\t5\n22.5\t4\n22.6\t4\n22.7\t4\n22.8\t7\n22.9\t4\n23.0\t3\n23.1\t5\n23.2\t4\n23.3\t7\n23.5\t7\n23.6\t5\n23.7\t2\n23.8\t3\n23.9\t5\n24.1\t3\n24.2\t4\n24.3\t5\n24.4\t9\n24.5\t5\n24.6\t4\n24.7\t6\n24.8\t2\n24.9\t2\n25.0\t7\n25.1\t5\n25.2\t4\n25.3\t7\n25.4\t5\n25.5\t3\n25.6\t3\n25.7\t3\n25.8\t9\n25.9\t5\n26.0\t6\n26.1\t8\n26.2\t7\n26.3\t10\n26.4\t2\n26.5\t4\n26.6\t6\n26.7\t8\n26.8\t4\n26.9\t9\n27.0\t8\n27.1\t4\n27.2\t10\n27.3\t8\n27.4\t3\n27.5\t10\n27.6\t6\n27.7\t8\n27.8\t8\n27.9\t6\n28.0\t8\n28.1\t9\n28.2\t13\n28.3\t6\n28.4\t11\n28.5\t4\n28.6\t3\n28.7\t10\n28.8\t6\n28.9\t2\n29.0\t2\n29.1\t8\n29.2\t7\n29.3\t4\n29.4\t7\n29.5\t7\n29.6\t5\n29.7\t2\n29.8\t4\n29.9\t8\n30.0\t4\n30.1\t5\n30.2\t3\n30.3\t5\n30.4\t4\n30.5\t7\n30.6\t3\n30.7\t6\n30.8\t5\n30.9\t4\n31.0\t3\n31.1\t3\n31.2\t5\n31.3\t6\n31.4\t6\n31.5\t4\n31.6\t3\n31.7\t5\n31.8\t3\n31.9\t2\n32.0\t7\n32.1\t4\n32.2\t6\n32.3\t3\n32.5\t5\n32.6\t2\n32.7\t5\n32.8\t4\n32.9\t3\n33.0\t5\n33.1\t8\n33.2\t8\n33.3\t5\n33.4\t2\n33.5\t4\n33.6\t5\n33.7\t8\n33.8\t5\n33.9\t7\n34.0\t6\n34.1\t5\n34.2\t7\n34.3\t4\n34.4\t5\n34.5\t8\n34.6\t8\n34.7\t8\n34.8\t8\n34.9\t5\n35.0\t10\n35.1\t7\n35.2\t5\n35.3\t6\n35.4\t7\n35.5\t5\n35.6\t7\n35.7\t2\n35.8\t5\n35.9\t5\n36.0\t3\n36.1\t3\n36.2\t8\n36.3\t4\n36.4\t4\n36.5\t6\n36.6\t5\n36.7\t5\n36.8\t5\n36.9\t3\n37.0\t3\n37.1\t4\n37.2\t3\n37.3\t5\n37.4\t3\n37.5\t3\n37.6\t4\n37.7\t5\n37.8\t7\n37.9\t4\n38.0\t7\n38.1\t2\n38.2\t6\n38.3\t2\n38.4\t3\n38.5\t2\n38.6\t2\n38.7\t6\n38.8\t4\n38.9\t5\n39.0\t4\n39.1\t4\n39.2\t6\n39.3\t8\n39.4\t3\n39.5\t7\n39.6\t4\n39.7\t11\n39.8\t8\n39.9\t4\n40.0\t2\n40.1\t5\n40.2\t6\n40.3\t5\n40.4\t6\n40.5\t2\n40.6\t3\n40.7\t5\n40.8\t7\n40.9\t6\n41.0\t4\n41.1\t6\n41.2\t2\n41.3\t3\n41.4\t5\n41.5\t2\n41.6\t6\n41.7\t4\n41.8\t2\n41.9\t1\n42.0\t9\n42.1\t7\n42.2\t2\n42.3\t3\n42.4\t3\n42.5\t6\n42.6\t4\n42.7\t5\n42.8\t3\n42.9\t3\n43.0\t2\n43.1\t4\n43.2\t4\n43.3\t1\n43.4\t1\n43.5\t12\n43.6\t4\n43.7\t2\n43.8\t1\n43.9\t2\n44.0\t2\n44.1\t3\n44.2\t3\n44.3\t7\n44.4\t5\n44.5\t3\n44.6\t3\n44.7\t3\n44.8\t3\n44.9\t3\n45.0\t6\n45.1\t5\n45.2\t4\n45.3\t3\n45.4\t4\n45.5\t6\n45.6\t6\n45.7\t3\n45.8\t1\n45.9\t7\n46.0\t3\n46.1\t4\n46.2\t4\n46.3\t1\n46.4\t3\n46.5\t2\n46.7\t5\n46.8\t3\n46.9\t6\n47.0\t4\n47.1\t3\n47.2\t5\n47.3\t2\n47.4\t3\n47.5\t8\n47.6\t3\n47.7\t4\n47.8\t1\n47.9\t1\n48.0\t2\n48.1\t2\n48.2\t2\n48.3\t2\n48.4\t2\n48.5\t3\n48.6\t1\n48.9\t2\n49.0\t1\n49.1\t1\n49.2\t1\n49.3\t1\n49.4\t1\n49.5\t3\n49.6\t1\n49.7\t2\n49.8\t3\n50.0\t2\n50.1\t3\n50.2\t1\n50.3\t1\n50.4\t4\n50.5\t3\n50.6\t1\n50.7\t2\n50.8\t3\n50.9\t2\n51.0\t3\n51.1\t3\n51.2\t1\n51.3\t1\n51.4\t1\n51.5\t4\n51.6\t3\n51.7\t2\n51.8\t1\n51.9\t4\n52.0\t1\n52.1\t3\n52.2\t5\n52.3\t1\n52.4\t2\n52.5\t2\n52.6\t1\n52.7\t6\n52.8\t4\n52.9\t5\n53.0\t3\n53.1\t3\n53.2\t3\n53.3\t5\n53.4\t4\n53.5\t3\n53.6\t8\n53.7\t8\n53.8\t4\n53.9\t5\n54.0\t8\n54.1\t1\n54.2\t2\n54.3\t4\n54.4\t3\n54.5\t1\n54.6\t1\n54.7\t4\n54.8\t4\n54.9\t1\n55.0\t6\n55.1\t3\n55.2\t4\n55.4\t2\n55.5\t5\n55.6\t3\n55.7\t1\n55.8\t3\n55.9\t3\n56.0\t1\n56.1\t2\n56.2\t2\n56.3\t1\n56.4\t5\n56.5\t1\n56.6\t3\n56.7\t5\n56.8\t5\n56.9\t5\n57.0\t4\n57.1\t4\n57.2\t1\n57.3\t2\n57.4\t8\n57.5\t4\n57.6\t3\n57.7\t4\n57.8\t5\n57.9\t3\n58.0\t7\n58.1\t3\n58.2\t6\n58.3\t6\n58.4\t5\n58.5\t3\n58.6\t5\n58.7\t6\n58.8\t5\n58.9\t5\n59.0\t5\n59.1\t4\n59.2\t3\n59.3\t5\n59.4\t7\n59.5\t4\n59.6\t6\n59.8\t4\n59.9\t7\n60.0\t3\n60.1\t6\n60.2\t7\n60.3\t5\n60.4\t3\n60.5\t2\n60.6\t6\n60.7\t6\n60.8\t6\n60.9\t5\n61.0\t3\n61.1\t1\n61.2\t1\n61.3\t4\n61.4\t6\n61.5\t3\n61.6\t3\n61.7\t2\n61.8\t5\n61.9\t3\n62.0\t3\n62.1\t3\n62.2\t4\n62.3\t6\n62.4\t7\n62.5\t6\n62.6\t6\n62.7\t5\n62.8\t3\n62.9\t9\n63.0\t5\n63.1\t5\n63.2\t2\n63.3\t3\n63.4\t6\n63.5\t10\n63.6\t8\n63.7\t8\n63.8\t7\n63.9\t3\n64.0\t8\n64.1\t7\n64.2\t3\n64.3\t4\n64.4\t6\n64.5\t3\n64.6\t3\n64.7\t10\n64.8\t17\n64.9\t1\n65.0\t3\n65.3\t3\n65.4\t2\n65.5\t2\n65.6\t1\n65.8\t1\n65.9\t3\n66.1\t1\n66.3\t1\n66.5\t4\n66.7\t2\n66.9\t2\n67.0\t3\n67.2\t2\n67.3\t3\n67.4\t1\n67.5\t5\n67.6\t4\n67.8\t1\n67.9\t3\n68.0\t2\n68.1\t2\n68.2\t1\n68.3\t2\n68.4\t2\n68.5\t1\n68.6\t1\n68.7\t3\n68.8\t2\n68.9\t2\n69.0\t2\n69.1\t3\n69.2\t2\n69.3\t3\n69.4\t4\n69.5\t6\n69.6\t5\n69.7\t3\n69.8\t1\n69.9\t5\n70.0\t3\n70.1\t1\n70.2\t3\n70.3\t4\n70.4\t3\n70.5\t4\n70.6\t5\n70.7\t2\n70.8\t5\n70.9\t7\n71.0\t6\n71.1\t3\n71.2\t2\n71.3\t3\n71.4\t11\n71.5\t3\n71.6\t5\n71.7\t5\n71.8\t8\n71.9\t4\n72.0\t9\n72.1\t9\n72.2\t4\n72.3\t3\n72.4\t4\n72.5\t6\n72.6\t4\n72.7\t5\n72.8\t9\n72.9\t10\n73.0\t6\n73.1\t6\n73.2\t4\n73.3\t6\n73.4\t2\n73.5\t5\n73.6\t5\n73.7\t4\n73.8\t9\n73.9\t4\n74.0\t5\n74.1\t10\n74.2\t8\n74.3\t8\n74.4\t9\n74.5\t7\n74.6\t7\n74.7\t5\n74.8\t2\n74.9\t2\n75.0\t3\n75.1\t8\n75.2\t2\n75.3\t5\n75.4\t3\n75.5\t3\n75.6\t4\n75.7\t6\n75.8\t6\n75.9\t5\n76.0\t6\n76.1\t5\n76.2\t4\n76.3\t11\n76.4\t10\n76.5\t5\n76.6\t5\n76.7\t4\n76.8\t6\n76.9\t3\n77.0\t6\n77.1\t6\n77.2\t3\n77.3\t4\n77.4\t5\n77.5\t6\n77.6\t4\n77.7\t7\n77.8\t3\n77.9\t4\n78.0\t3\n78.1\t2\n78.2\t5\n78.3\t2\n78.4\t7\n78.5\t8\n78.6\t3\n78.8\t5\n78.9\t5\n79.0\t6\n79.1\t4\n79.2\t6\n79.3\t4\n79.4\t2\n79.5\t2\n79.6\t2\n79.7\t3\n79.8\t2\n79.9\t2\n80.0\t7\n80.1\t2\n80.2\t1\n80.3\t4\n80.4\t4\n80.5\t1\n80.6\t5\n80.7\t3\n80.8\t4\n80.9\t5\n81.0\t2\n81.1\t6\n81.2\t1\n81.3\t1\n81.4\t3\n81.5\t1\n81.6\t3\n81.7\t5\n81.8\t3\n81.9\t6\n82.0\t1\n82.1\t3\n82.2\t2\n82.3\t2\n82.4\t4\n82.5\t8\n82.6\t7\n82.7\t2\n82.8\t2\n82.9\t4\n83.0\t7\n83.1\t5\n83.2\t1\n83.3\t8\n83.4\t6\n83.5\t1\n83.6\t5\n83.7\t1\n83.8\t6\n83.9\t4\n84.0\t2\n84.1\t3\n84.2\t4\n84.3\t5\n84.4\t2\n84.5\t1\n84.6\t3\n84.7\t2\n84.8\t5\n84.9\t2\n85.0\t5\n85.1\t7\n85.2\t2\n85.3\t2\n85.4\t3\n85.5\t3\n85.6\t4\n85.8\t4\n85.9\t4\n86.0\t4\n86.1\t2\n86.2\t2\n86.3\t3\n86.4\t2\n86.6\t2\n86.7\t1\n86.8\t4\n86.9\t3\n87.0\t1\n87.1\t6\n87.2\t1\n87.3\t2\n87.5\t5\n87.6\t2\n87.7\t2\n87.8\t5\n87.9\t2\n88.0\t3\n88.1\t6\n88.2\t6\n88.3\t3\n88.4\t8\n88.5\t6\n88.6\t2\n88.7\t4\n88.8\t10\n88.9\t6\n89.0\t9\n89.1\t5\n89.2\t6\n89.3\t7\n89.4\t6\n89.5\t6\n89.6\t9\n89.7\t6\n89.8\t6\n89.9\t6\n90.0\t1\n90.1\t9\n90.2\t8\n90.3\t11\n90.4\t4\n90.5\t5\n90.6\t9\n90.7\t4\n90.8\t9\n90.9\t7\n91.0\t8\n91.1\t7\n91.2\t4\n91.3\t4\n91.4\t4\n91.5\t3\n91.6\t1\n91.7\t1\n91.8\t8\n91.9\t4\n92.0\t14\n92.1\t5\n92.2\t6\n92.4\t3\n92.5\t2\n92.6\t4\n92.7\t2\n92.8\t6\n92.9\t4\n93.0\t7\n93.1\t2\n93.2\t4\n93.3\t4\n93.4\t4\n93.5\t4\n93.6\t2\n93.7\t3\n93.8\t4\n93.9\t3\n94.0\t6\n94.1\t6\n94.2\t5\n94.3\t7\n94.4\t5\n94.5\t5\n94.6\t3\n94.7\t1\n94.8\t10\n94.9\t5\n95.0\t9\n95.1\t3\n95.2\t8\n95.3\t7\n95.4\t9\n95.5\t4\n95.6\t10\n95.7\t4\n95.8\t9\n95.9\t9\n96.0\t7\n96.1\t8\n96.2\t8\n96.3\t9\n96.4\t2\n96.5\t7\n96.6\t4\n96.7\t2\n96.8\t6\n96.9\t8\n97.0\t5\n97.1\t13\n97.2\t3\n97.3\t8\n97.4\t7\n97.5\t3\n97.6\t4\n97.7\t1\n97.8\t3\n97.9\t4\n98.0\t8\n98.1\t4\n98.2\t3\n98.3\t3\n98.4\t8\n98.5\t5\n98.7\t3\n98.8\t3\n98.9\t6\n99.0\t2\n99.1\t12\n99.2\t5\n99.3\t4\n99.4\t6\n99.5\t2\n99.6\t3\n99.7\t6\n99.8\t4\n99.9\t10\n100.0\t8\n100.1\t5\n100.2\t9\n100.3\t5\n100.4\t10\n100.5\t7\n100.6\t4\n100.7\t3\n100.8\t8\n100.9\t6\n101.0\t7\n101.1\t8\n101.2\t2\n101.3\t3\n101.4\t4\n101.5\t5\n101.6\t4\n101.7\t7\n101.8\t2\n101.9\t2\n102.0\t2\n102.1\t6\n102.2\t4\n102.3\t3\n102.4\t3\n102.5\t5\n102.6\t7\n102.7\t2\n102.8\t2\n102.9\t2\n103.0\t22\n103.1\t4\n103.2\t2\n103.3\t4\n103.4\t5\n103.5\t6\n103.6\t3\n103.7\t3\n103.8\t3\n103.9\t1\n104.0\t2\n104.1\t1\n104.2\t1\n104.3\t1\n104.4\t1\n104.5\t2\n104.6\t2\n104.7\t3\n105.0\t2\n105.1\t1\n105.5\t1\n105.8\t2\n106.4\t1\n106.5\t1\n106.6\t1\n106.8\t1\n107.0\t1\n107.2\t1\n107.5\t3\n107.6\t1\n107.9\t1\n108.5\t2\n108.6\t4\n108.9\t1\n109.0\t2\n109.1\t1\n109.2\t2\n109.3\t2\n109.4\t3\n109.5\t9\n109.6\t3\n109.7\t2\n109.8\t0\n109.9\t3\n110.0\t4\n110.1\t4\n110.2\t3\n110.3\t1\n110.4\t2\n110.5\t6\n110.6\t9\n110.7\t7\n110.8\t8\n110.9\t8\n111.0\t9\n111.1\t1\n111.2\t1\n111.3\t9\n111.4\t10\n111.5\t9\n111.6\t10\n111.7\t8\n111.8\t8\n111.9\t10\n112.0\t6\n112.1\t3\n112.2\t10\n112.3\t9\n112.4\t8\n112.5\t4\n112.6\t6\n112.7\t7\n112.8\t5\n112.9\t6\n113.0\t4\n113.1\t3\n113.2\t4\n113.3\t2\n113.5\t4\n113.6\t3\n113.7\t9\n113.8\t1\n113.9\t8\n114.0\t4\n114.1\t1\n114.2\t1\n114.3\t4\n114.4\t3\n114.5\t2\n114.7\t1\n114.8\t1\n114.9\t1\n115.0\t2\n115.1\t1\n115.3\t0\n115.4\t13\n115.5\t1\n115.6\t1\n115.7\t2\n115.8\t1\n115.9\t1\n116.0\t2\n116.2\t2\n116.3\t1\n116.4\t1\n116.5\t2\n116.7\t1\n116.8\t2\n116.9\t5\n117.0\t3\n117.1\t3\n117.2\t5\n117.3\t5\n117.4\t3\n117.5\t2\n117.6\t2\n117.7\t2\n117.8\t4\n117.9\t2\n118.0\t1\n118.1\t1\n118.2\t5\n118.3\t3\n118.4\t4\n118.5\t6\n118.6\t2\n118.7\t4\n118.8\t1\n118.9\t7\n119.0\t25\n119.1\t2\n119.2\t8\n119.3\t5\n119.4\t6\n119.5\t4\n119.6\t6\n119.7\t6\n119.8\t2\n119.9\t8\n120.0\t3\n120.1\t4\n120.2\t6\n120.3\t5\n120.4\t5\n120.5\t7\n120.6\t6\n120.7\t8\n120.8\t9\n120.9\t4\n121.0\t6\n121.1\t7\n121.2\t2\n121.3\t1\n121.4\t7\n121.5\t5\n121.6\t6\n121.7\t5\n121.8\t3\n121.9\t3\n122.0\t4\n122.1\t4\n122.2\t1\n122.3\t5\n122.4\t2\n122.5\t3\n122.6\t3\n122.7\t2\n122.8\t4\n122.9\t3\n123.0\t3\n123.1\t1\n123.3\t2\n123.4\t1\n123.6\t2\n123.7\t1\n123.9\t1\n124.0\t4\n124.1\t1\n124.2\t1\n124.3\t3\n124.4\t1\n124.5\t1\n124.6\t3\n124.8\t1\n124.9\t2\n125.0\t1\n125.1\t1\n125.2\t3\n125.3\t1\n125.5\t1\n125.6\t3\n125.7\t4\n125.8\t1\n125.9\t1\n126.0\t1\n126.1\t4\n126.2\t2\n126.3\t3\n126.5\t4\n126.7\t6\n126.8\t2\n126.9\t3\n127.0\t1\n127.1\t2\n127.2\t2\n127.3\t2\n127.4\t3\n127.5\t5\n127.6\t2\n127.7\t3\n127.8\t2\n127.9\t4\n128.0\t2\n128.1\t7\n128.2\t3\n128.3\t2\n128.4\t6\n128.5\t2\n128.6\t1\n128.7\t3\n128.8\t3\n128.9\t5\n129.0\t4\n129.1\t2\n129.2\t6\n129.3\t4\n129.4\t6\n129.5\t3\n129.6\t1\n129.7\t2\n129.8\t3\n129.9\t6\n130.0\t6\n130.1\t3\n130.2\t4\n130.3\t2\n130.4\t2\n130.5\t4\n130.7\t4\n130.8\t6\n130.9\t1\n131.0\t1\n131.1\t1\n131.2\t4\n131.3\t1\n131.4\t2\n131.5\t2\n131.6\t2\n131.7\t2\n131.8\t2\n131.9\t1\n132.0\t1\n132.2\t2\n132.4\t1\n132.5\t1\n132.6\t1\n132.8\t4\n132.9\t3\n133.0\t4\n133.1\t1\n133.2\t1\n133.3\t1\n133.4\t1\n133.5\t3\n133.6\t1\n133.7\t1\n133.8\t2\n133.9\t1\n134.0\t2\n134.1\t2\n134.3\t1\n134.4\t4\n134.5\t1\n134.6\t1\n134.7\t4\n134.8\t4\n134.9\t2\n135.0\t2\n135.1\t1\n135.2\t3\n135.3\t16\n135.4\t5\n135.5\t2\n135.6\t5\n135.8\t4\n135.9\t2\n136.0\t1\n136.1\t1\n136.2\t3\n136.3\t1\n136.4\t6\n136.5\t2\n136.6\t2\n136.8\t3\n136.9\t1\n137.0\t5\n137.1\t5\n137.2\t2\n137.3\t2\n137.4\t1\n137.6\t2\n137.7\t1\n137.8\t1\n137.9\t8\n138.0\t2\n138.3\t1\n138.4\t1\n138.6\t1\n138.7\t1\n138.8\t4\n138.9\t1\n139.1\t1\n139.2\t2\n139.3\t1\n139.4\t3\n139.5\t5\n139.6\t2\n139.7\t1\n139.8\t5\n139.9\t3\n140.0\t2\n140.1\t3\n140.2\t3\n140.4\t5\n140.5\t5\n140.6\t3\n140.7\t8\n140.8\t5\n140.9\t6\n141.0\t4\n141.1\t4\n141.2\t6\n141.3\t7\n141.4\t6\n141.5\t5\n141.6\t5\n141.7\t5\n141.8\t7\n141.9\t2\n142.0\t4\n142.1\t5\n142.2\t8\n142.3\t4\n142.4\t4\n142.5\t5\n142.6\t4\n142.7\t4\n142.8\t3\n142.9\t9\n143.0\t3\n143.1\t4\n143.2\t3\n143.3\t3\n143.4\t7\n143.5\t6\n143.6\t10\n143.7\t4\n143.8\t4\n143.9\t3\n144.0\t1\n144.1\t3\n144.2\t2\n144.3\t3\n144.5\t4\n144.6\t7\n144.7\t5\n144.8\t5\n144.9\t2\n145.0\t4\n145.1\t7\n145.2\t6\n145.3\t4\n145.4\t2\n145.5\t3\n145.6\t6\n145.7\t2\n145.8\t4\n145.9\t7\n146.0\t7\n146.1\t4\n146.2\t5\n146.3\t10\n146.4\t5\n146.5\t6\n146.6\t9\n146.7\t5\n146.8\t4\n146.9\t6\n147.0\t8\n147.1\t7\n147.2\t6\n147.3\t5\n147.4\t2\n147.5\t6\n147.6\t2\n147.7\t4\n147.8\t7\n147.9\t4\n148.0\t6\n148.1\t3\n148.2\t4\n148.3\t5\n148.4\t1\n148.5\t2\n148.6\t4\n148.7\t2\n148.8\t4\n148.9\t6\n149.0\t1\n149.1\t1\n149.2\t7\n149.3\t3\n149.4\t1\n149.5\t2\n149.6\t3\n149.7\t3\n149.9\t5\n150.0\t1\n150.1\t3\n150.2\t1\n150.3\t3\n150.4\t2\n150.5\t3\n150.6\t6\n150.7\t2\n150.8\t1\n151.0\t2\n151.3\t2\n151.4\t1\n151.5\t1\n151.6\t2\n151.7\t2\n151.8\t3\n152.0\t2\n152.2\t1\n152.3\t1\n152.4\t1\n152.5\t2\n152.7\t1\n152.8\t1\n152.9\t0\n153.1\t1\n153.3\t2\n153.4\t1\n153.5\t1\n153.6\t3\n153.8\t1\n153.9\t1\n154.1\t2\n154.2\t1\n154.3\t1\n154.4\t1\n154.5\t1\n154.7\t1\n154.8\t1\n155.1\t2\n155.2\t1\n155.3\t1\n155.6\t1\n155.7\t1\n155.8\t1\n155.9\t1\n156.2\t1\n156.4\t1\n156.5\t1\n156.8\t1\n156.9\t1\n157.2\t1\n157.3\t2\n157.8\t1\n157.9\t1\n158.0\t3\n158.2\t1\n158.3\t0\n158.6\t1\n158.7\t1\n158.8\t1\n159.0\t1\n159.1\t1\n159.3\t2\n159.5\t0\n159.6\t1\n159.9\t2\n160.0\t2\n160.2\t1\n160.3\t2\n160.4\t1\n160.5\t2\n160.6\t6\n160.7\t3\n160.9\t1\n161.0\t1\n161.1\t1\n161.3\t3\n161.5\t2\n161.7\t1\n161.8\t4\n161.9\t1\n162.0\t2\n162.1\t1\n162.2\t2\n162.4\t4\n162.5\t4\n162.6\t4\n162.7\t3\n162.8\t6\n162.9\t2\n163.0\t6\n163.1\t2\n163.2\t1\n163.3\t4\n163.4\t2\n163.5\t4\n163.6\t3\n163.7\t3\n163.8\t3\n164.0\t2\n164.1\t3\n164.2\t2\n164.3\t2\n164.4\t2\n164.5\t7\n164.6\t4\n164.7\t6\n164.8\t4\n164.9\t5\n165.0\t3\n165.1\t5\n165.2\t3\n165.3\t2\n165.4\t1\n165.5\t10\n165.6\t5\n165.7\t4\n165.8\t6\n165.9\t2\n166.0\t9\n166.1\t1\n166.2\t4\n166.3\t5\n166.4\t5\n166.5\t6\n166.6\t5\n166.8\t8\n166.9\t3\n167.0\t7\n167.1\t5\n167.2\t1\n167.3\t3\n167.5\t2\n167.6\t2\n167.7\t4\n167.8\t8\n168.0\t2\n168.1\t7\n168.2\t3\n168.3\t5\n168.4\t3\n168.5\t3\n168.6\t1\n168.7\t4\n168.8\t4\n169.0\t3\n169.1\t7\n169.2\t3\n169.3\t2\n169.4\t2\n169.5\t6\n169.6\t4\n169.7\t0\n169.8\t2\n170.0\t3\n170.1\t2\n170.4\t4\n170.6\t2\n170.7\t2\n170.8\t1\n170.9\t4\n171.0\t1\n171.1\t2\n171.2\t2\n171.4\t1\n171.5\t1\n171.6\t2\n171.7\t2\n171.8\t1\n171.9\t1\n172.0\t1\n172.1\t1\n172.3\t2\n172.4\t2\n172.6\t3\n172.7\t1\n172.8\t3\n172.9\t2\n173.0\t2\n173.1\t3\n173.2\t2\n173.3\t1\n173.5\t3\n173.7\t2\n173.8\t1\n173.9\t1\n174.0\t1\n174.1\t2\n174.2\t1\n174.3\t2\n174.5\t1\n174.9\t2\n175.2\t1\n175.6\t1\n175.8\t1\n175.9\t1\n176.0\t1\n176.2\t1\n176.3\t1\n176.4\t3\n176.5\t2\n176.7\t3\n176.9\t3\n177.0\t1\n177.1\t2\n177.2\t1\n177.3\t4\n177.4\t2\n177.5\t3\n177.6\t1\n177.7\t1\n177.8\t1\n177.9\t1\n178.0\t5\n178.1\t1\n178.2\t5\n178.3\t6\n178.4\t5\n178.5\t8\n178.6\t8\n178.7\t4\n178.8\t6\n178.9\t6\n179.0\t4\n179.1\t5\n179.2\t5\n179.3\t4\n179.4\t8\n179.5\t8\n179.6\t10\n179.7\t5\n179.8\t10\n179.9\t11\n180.0\t6\n180.1\t6\n180.2\t2\n180.3\t7\n180.4\t8\n180.5\t7\n180.6\t2\n180.7\t6\n180.8\t10\n180.9\t2\n181.0\t9\n181.1\t3\n181.2\t4\n181.3\t3\n181.4\t2\n181.5\t4\n181.6\t5\n181.7\t5\n181.8\t8\n181.9\t10\n182.0\t8\n182.1\t6\n182.2\t4\n182.3\t7\n182.4\t3\n182.5\t2\n182.6\t7\n182.7\t6\n182.8\t5\n182.9\t4\n183.0\t3\n183.1\t5\n183.2\t2\n183.3\t3\n183.4\t2\n183.5\t4\n183.6\t5\n183.7\t5\n183.8\t6\n183.9\t3\n184.0\t4\n184.1\t6\n184.2\t6\n184.3\t3\n184.4\t6\n184.5\t6\n184.6\t6\n184.7\t8\n184.8\t3\n184.9\t7\n185.0\t5\n185.1\t7\n185.2\t10\n185.3\t9\n185.4\t6\n185.5\t6\n185.6\t4\n185.7\t8\n185.8\t3\n185.9\t2\n186.0\t6\n186.1\t7\n186.2\t8\n186.3\t7\n186.4\t5\n186.5\t8\n186.6\t6\n186.7\t7\n186.8\t5\n186.9\t10\n187.0\t8\n187.1\t9\n187.2\t8\n187.3\t7\n187.4\t7\n187.5\t2\n187.6\t10\n187.7\t9\n187.8\t2\n187.9\t5\n188.0\t5\n188.1\t4\n188.2\t6\n188.3\t2\n188.4\t1\n188.5\t2\n188.6\t1\n188.7\t2\n188.8\t6\n188.9\t3\n189.0\t3\n189.1\t3\n189.2\t6\n189.3\t3\n189.4\t3\n189.5\t3\n189.6\t1\n189.7\t2\n189.8\t5\n189.9\t5\n190.0\t2\n190.1\t3\n190.2\t2\n190.3\t3\n190.4\t4\n190.5\t4\n190.6\t4\n190.7\t4\n190.8\t2\n190.9\t5\n191.0\t2\n191.1\t2\n191.2\t3\n191.3\t6\n191.4\t3\n191.5\t1\n191.6\t3\n191.7\t3\n191.8\t4\n191.9\t9\n192.0\t8\n192.1\t2\n192.2\t9\n192.3\t5\n192.4\t8\n192.5\t6\n192.6\t5\n192.7\t9\n192.8\t8\n192.9\t13\n193.0\t9\n193.1\t12\n193.2\t5\n193.3\t12\n193.4\t4\n193.5\t19\n193.6\t4\n193.7\t12\n193.8\t11\n193.9\t19\n194.0\t12\n194.1\t11\n194.2\t16\n194.3\t9\n194.4\t7\n194.5\t17\n194.6\t13\n194.7\t12\n194.8\t12\n194.9\t13\n195.0\t13\n195.1\t9\n195.2\t12\n195.3\t8\n195.4\t12\n195.5\t10\n195.6\t15\n195.7\t11\n195.8\t12\n195.9\t14\n196.0\t16\n196.1\t16\n196.2\t13\n196.3\t9\n196.4\t19\n196.5\t17\n196.6\t11\n196.7\t16\n196.8\t14\n196.9\t8\n197.0\t12\n197.1\t14\n197.2\t10\n197.3\t17\n197.4\t17\n197.5\t21\n197.6\t15\n197.7\t22\n197.8\t14\n197.9\t16\n198.0\t26\n198.1\t22\n198.2\t13\n198.3\t16\n198.4\t15\n198.5\t16\n198.6\t14\n198.7\t23\n198.8\t11\n198.9\t20\n199.0\t10\n199.1\t13\n199.2\t11\n199.3\t12\n199.4\t11\n199.5\t15\n199.6\t15\n199.7\t18\n199.8\t17\n199.9\t15\n200.0\t21\n200.1\t14\n200.2\t13\n200.3\t7\n200.4\t12\n200.5\t10\n200.6\t7\n200.7\t10\n200.8\t10\n200.9\t9\n201.0\t14\n201.1\t9\n201.2\t10\n201.3\t6\n201.4\t10\n201.5\t10\n201.6\t5\n201.7\t6\n201.8\t12\n201.9\t9\n202.0\t12\n202.1\t8\n202.2\t7\n202.3\t6\n202.4\t6\n202.5\t2\n202.6\t5\n202.7\t4\n202.8\t8\n202.9\t3\n203.0\t4\n203.1\t6\n203.2\t5\n203.3\t3\n203.4\t2\n203.5\t6\n203.6\t5\n203.7\t6\n203.8\t5\n203.9\t2\n204.0\t2\n204.1\t4\n204.2\t3\n204.3\t3\n204.4\t3\n204.5\t2\n204.6\t3\n204.7\t10\n204.8\t4\n204.9\t7\n205.0\t11\n205.1\t11\n205.2\t6\n205.3\t4\n205.4\t6\n205.5\t10\n205.6\t6\n205.7\t8\n205.8\t9\n205.9\t9\n206.0\t9\n206.1\t10\n206.2\t8\n206.3\t7\n206.4\t14\n206.5\t9\n206.6\t12\n206.7\t10\n206.8\t9\n206.9\t14\n207.0\t13\n207.1\t18\n207.2\t10\n207.3\t8\n207.4\t13\n207.5\t17\n207.6\t10\n207.7\t9\n207.8\t5\n207.9\t11\n208.0\t9\n208.1\t5\n208.2\t8\n208.3\t11\n208.4\t4\n208.5\t15\n208.6\t8\n208.7\t11\n208.8\t12\n208.9\t8\n209.0\t8\n209.1\t8\n209.2\t10\n209.3\t10\n209.4\t10\n209.5\t12\n209.6\t8\n209.7\t5\n209.8\t12\n209.9\t10\n210.0\t10\n210.1\t12\n210.2\t9\n210.3\t12\n210.4\t3\n210.5\t13\n210.6\t9\n210.7\t7\n210.8\t11\n210.9\t13\n211.0\t8\n211.1\t7\n211.2\t8\n211.3\t11\n211.4\t9\n211.5\t8\n211.6\t10\n211.7\t15\n211.8\t8\n211.9\t12\n212.0\t6\n212.1\t9\n212.2\t5\n212.3\t11\n212.4\t7\n212.5\t17\n212.6\t1\n212.7\t4\n212.8\t6\n212.9\t6\n213.0\t8\n213.1\t6\n213.2\t7\n213.3\t7\n213.4\t5\n213.5\t11\n213.6\t7\n213.7\t4\n213.8\t4\n213.9\t3\n214.0\t6\n214.1\t4\n214.2\t4\n214.3\t7\n214.4\t4\n214.5\t5\n214.6\t6\n214.7\t5\n214.8\t5\n214.9\t7\n215.0\t9\n215.1\t7\n215.2\t8\n215.3\t6\n215.4\t9\n215.5\t3\n215.6\t5\n215.7\t6\n215.8\t3\n215.9\t7\n216.0\t5\n216.1\t3\n216.2\t3\n216.3\t10\n216.4\t1\n216.5\t3\n216.6\t6\n216.7\t5\n216.8\t2\n216.9\t5\n217.0\t6\n217.1\t5\n217.2\t8\n217.3\t12\n217.4\t13\n217.5\t10\n217.6\t5\n217.7\t8\n217.8\t7\n217.9\t8\n218.0\t7\n218.1\t1\n218.2\t4\n218.3\t8\n218.4\t6\n218.5\t10\n218.6\t5\n218.7\t7\n218.8\t7\n218.9\t3\n219.0\t7\n219.1\t2\n219.2\t6\n219.3\t3\n219.4\t8\n219.5\t2\n219.6\t2\n219.7\t5\n219.8\t2\n219.9\t3\n220.0\t4\n220.1\t5\n220.2\t1\n220.3\t1\n220.4\t2\n220.6\t4\n220.7\t4\n220.8\t2\n220.9\t3\n221.0\t3\n221.1\t4\n221.2\t1\n221.3\t3\n221.5\t1\n221.7\t3\n221.8\t3\n221.9\t1\n222.0\t6\n222.1\t4\n222.2\t3\n222.3\t7\n222.4\t7\n222.5\t8\n222.6\t8\n222.7\t4\n222.8\t9\n222.9\t12\n223.0\t17\n223.1\t15\n223.2\t11\n223.3\t15\n223.4\t14\n223.5\t13\n223.6\t8\n223.7\t19\n223.8\t20\n223.9\t22\n224.0\t28\n224.1\t22\n224.2\t15\n224.3\t16\n224.4\t21\n224.5\t26\n224.6\t23\n224.7\t20\n224.8\t20\n224.9\t17\n225.0\t24\n225.1\t14\n225.2\t24\n225.3\t19\n225.4\t20\n225.5\t24\n225.6\t16\n225.7\t16\n225.8\t19\n225.9\t22\n226.0\t16\n226.1\t30\n226.2\t21\n226.3\t23\n226.4\t21\n226.5\t15\n226.6\t13\n226.7\t20\n226.8\t18\n226.9\t13\n227.0\t11\n227.1\t17\n227.2\t16\n227.3\t9\n227.4\t11\n227.5\t11\n227.6\t14\n227.7\t16\n227.8\t8\n227.9\t13\n228.0\t18\n228.1\t10\n228.2\t21\n228.3\t16\n228.4\t16\n228.5\t14\n228.6\t9\n228.7\t9\n228.8\t10\n228.9\t13\n229.0\t13\n229.1\t9\n229.2\t17\n229.3\t7\n229.4\t11\n229.5\t4\n229.6\t9\n229.7\t14\n229.8\t11\n229.9\t14\n230.0\t15\n230.1\t9\n230.2\t14\n230.3\t6\n230.4\t7\n230.5\t10\n230.6\t11\n230.7\t13\n230.8\t22\n230.9\t14\n231.0\t19\n231.1\t17\n231.2\t15\n231.3\t14\n231.4\t7\n231.5\t14\n231.6\t9\n231.7\t17\n231.8\t20\n231.9\t13\n232.0\t20\n232.1\t11\n232.2\t14\n232.3\t19\n232.4\t18\n232.5\t18\n232.6\t12\n232.7\t14\n232.8\t18\n232.9\t18\n233.0\t15\n233.1\t12\n233.2\t15\n233.3\t22\n233.4\t11\n233.5\t18\n233.6\t11\n233.7\t15\n233.8\t12\n233.9\t17\n234.0\t16\n234.1\t14\n234.2\t11\n234.3\t14\n234.4\t15\n234.5\t14\n234.6\t8\n234.7\t18\n234.8\t17\n234.9\t21\n235.0\t17\n235.1\t14\n235.2\t9\n235.3\t13\n235.4\t16\n235.5\t6\n235.6\t20\n235.7\t16\n235.8\t9\n235.9\t16\n236.0\t11\n236.1\t10\n236.2\t15\n236.3\t15\n236.4\t13\n236.5\t11\n236.6\t13\n236.7\t13\n236.8\t20\n236.9\t10\n237.0\t19\n237.1\t15\n237.2\t14\n237.3\t12\n237.4\t10\n237.5\t19\n237.6\t16\n237.7\t19\n237.8\t11\n237.9\t14\n238.0\t19\n238.1\t19\n238.2\t15\n238.3\t13\n238.4\t16\n238.5\t14\n238.6\t13\n238.7\t9\n238.8\t15\n238.9\t13\n239.0\t15\n239.1\t13\n239.2\t16\n239.3\t16\n239.4\t10\n239.5\t14\n239.6\t19\n239.7\t15\n239.8\t8\n239.9\t4\n240.0\t32\n240.1\t28\n240.2\t26\n240.3\t8\n240.4\t8\n240.5\t30\n240.6\t6\n240.7\t8\n240.8\t11\n240.9\t9\n241.0\t6\n241.1\t12\n241.2\t3\n241.3\t9\n241.4\t7\n241.5\t10\n241.6\t8\n241.7\t10\n241.8\t10\n241.9\t6\n242.0\t15\n242.1\t36\n242.2\t15\n242.3\t5\n242.4\t9\n242.5\t2\n242.6\t13\n242.7\t12\n242.8\t8\n242.9\t10\n243.0\t6\n243.1\t10\n243.2\t11\n243.3\t12\n243.4\t10\n243.5\t8\n243.6\t9\n243.7\t16\n243.8\t9\n243.9\t7\n244.0\t15\n244.1\t29\n244.2\t15\n244.3\t16\n244.4\t8\n244.5\t12\n244.6\t8\n244.7\t4\n244.8\t7\n244.9\t5\n245.0\t14\n245.1\t6\n245.2\t4\n245.3\t4\n245.4\t4\n245.5\t5\n245.6\t5\n245.7\t5\n245.8\t4\n245.9\t7\n246.0\t3\n246.1\t5\n246.2\t1\n246.3\t3\n246.4\t1\n246.5\t2\n246.6\t1\n246.7\t3\n246.8\t1\n247.0\t3\n247.1\t3\n247.2\t2\n247.3\t1\n247.4\t1\n247.5\t1\n247.7\t1\n247.8\t2\n247.9\t1\n248.0\t1\n248.4\t1\n248.7\t1\n248.9\t2\n249.1\t1\n249.3\t3\n249.4\t1\n249.5\t1\n249.6\t3\n249.8\t2\n249.9\t6\n250.0\t1\n250.1\t2\n250.2\t3\n250.3\t4\n250.5\t3\n250.6\t6\n250.7\t4\n250.8\t6\n250.9\t3\n251.0\t2\n251.1\t10\n251.2\t6\n251.3\t6\n251.4\t5\n251.5\t7\n251.6\t6\n251.7\t4\n251.8\t6\n251.9\t10\n252.0\t4\n252.1\t4\n252.2\t9\n252.3\t7\n252.4\t5\n252.5\t6\n252.6\t3\n252.7\t7\n252.8\t6\n252.9\t5\n253.0\t3\n253.1\t7\n253.2\t5\n253.3\t1\n253.4\t2\n253.5\t1\n253.6\t1\n253.7\t2\n253.8\t2\n253.9\t1\n254.0\t1\n254.2\t2\n254.3\t2\n254.4\t3\n254.5\t6\n254.6\t3\n254.7\t3\n254.8\t2\n254.9\t1\n255.0\t1\n255.1\t2\n255.8\t2\n256.1\t1\n256.6\t2\n257.8\t1\n257.9\t1\n258.1\t1\n258.2\t1\n258.4\t1\n258.5\t1\n259.0\t1\n259.2\t1\n259.3\t1\n259.5\t1\n259.6\t1\n259.7\t1\n260.0\t1\n260.1\t1\n260.5\t1\n260.8\t2\n260.9\t1\n261.0\t2\n261.7\t1\n261.8\t2\n262.0\t1\n262.1\t2\n262.2\t1\n262.3\t3\n263.1\t1\n263.2\t1\n264.2\t1\n265.0\t1\n270.6\t1\n270.9\t1\n272.0\t1\n272.4\t1\n273.7\t1\n292.1\t1\n330.7\t1\n331.0\t4\n331.2\t18\n343.1\t0\n350.5\t3\n354.4\t0\n354.6\t0\n357.6\t508\n360.0\t0\n394.2\t0\n395.5\t0\n396.5\t0\n397.4\t0\n397.5\t0\n397.6\t0\n397.7\t0\n397.9\t0\n398.0\t0\n398.1\t0\n398.2\t0\n398.3\t0\n398.4\t0\n398.5\t0\n398.6\t0\n398.7\t0\n398.8\t0\n399.0\t0\n399.1\t0\n399.2\t0\n399.3\t0\n399.4\t0\n399.5\t0\n399.7\t0\n399.8\t0\n399.9\t0\n400.0\t0\n400.1\t0\n400.2\t0\n400.3\t0\n400.4\t0\n400.5\t0\n400.6\t0\n400.7\t0\n400.8\t0\n400.9\t0\n401.0\t0\n401.1\t0\n401.2\t0\n401.4\t0\n401.5\t0\n401.6\t0\n401.7\t0\n401.8\t0\n401.9\t0\n402.0\t0\n402.1\t0\n402.2\t0\n402.3\t0\n402.4\t0\n402.5\t0\n402.6\t0\n402.9\t0\n403.3\t0\n403.5\t0\n404.2\t0\n404.4\t0\n404.9\t0\n405.2\t0\n405.4\t0\n405.5\t0\n405.9\t0\n406.0\t0\n406.2\t0\n406.3\t0\n406.5\t0\n408.0\t0\n410.8\t0\n412.3\t0\n413.1\t0\n414.8\t0\n414.9\t0\n415.4\t0\n415.5\t0\n415.6\t0\n415.7\t0\n415.8\t0\n416.1\t0\n416.3\t0\n416.4\t0\n416.5\t0\n416.6\t0\n416.8\t0\n416.9\t0\n417.1\t0\n417.2\t0\n417.3\t0\n417.4\t0\n417.5\t0\n417.6\t0\n417.7\t0\n417.9\t0\n418.0\t0\n418.3\t0\n418.5\t0\n418.6\t0\n418.7\t0\n418.8\t0\n418.9\t0\n419.0\t0\n419.1\t0\n419.2\t0\n419.4\t0\n419.7\t0\n419.8\t0\n420.2\t0\n420.7\t0\n420.8\t0\n421.2\t0\n421.5\t0\n421.7\t0\n421.9\t0\n422.7\t0\n423.6\t0\n423.8\t0\n423.9\t0\n424.2\t0\n425.2\t0\n425.6\t0\n425.7\t0\n426.0\t0\n426.2\t0\n426.5\t0\n426.6\t0\n426.7\t0\n426.8\t0\n426.9\t0\n427.9\t0\n428.0\t0\n428.6\t0\n428.8\t0\n430.4\t0\n430.6\t0\n430.7\t0\n430.9\t0\n431.0\t0\n431.1\t0\n431.2\t0\n431.3\t0\n431.4\t0\n431.5\t0\n431.6\t0\n431.8\t0\n431.9\t0\n432.0\t0\n432.1\t0\n432.2\t0\n432.3\t0\n432.5\t0\n432.6\t0\n432.7\t0\n432.8\t0\n432.9\t0\n433.0\t0\n433.1\t0\n433.2\t0\n433.3\t0\n433.4\t0\n433.7\t0\n433.8\t0\n433.9\t0\n434.1\t0\n434.2\t0\n434.3\t0\n434.4\t0\n434.5\t0\n434.6\t0\n434.8\t0\n434.9\t0\n435.1\t0\n435.2\t0\n435.3\t0\n435.4\t0\n435.5\t0\n435.6\t0\n435.7\t0\n435.9\t0\n436.0\t0\n436.2\t0\n436.3\t0\n436.9\t0\n437.0\t0\n437.2\t0\n437.9\t0\n438.0\t0\n"
+      },
+      "dateCreated": "Mar 19, 2015 2:25:25 PM",
+      "dateStarted": "Mar 23, 2015 10:46:49 AM",
+      "dateFinished": "Mar 23, 2015 10:46:56 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n###7. Show the count of command distribution based on the interval of update a key with the same value\nX-axis: left is number of continous \u0027update\u0027 for the same value; Right is the interval of \u0027update\u0027 for the same value\nY-axis: the number of the keys on the X-axis specified value.",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1426746653507_1449414683",
+      "id": "20150319-143053_1735886045",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch3\u003e7. Show the count of command distribution based on the interval of update a key with the same value\u003c/h3\u003e\n\u003cp\u003eX-axis: left is number of continous \u0027update\u0027 for the same value; Right is the interval of \u0027update\u0027 for the same value\n\u003cbr  /\u003eY-axis: the number of the keys on the X-axis specified value.\u003c/p\u003e\n"
+      },
+      "dateCreated": "Mar 19, 2015 2:30:53 PM",
+      "dateStarted": "Mar 23, 2015 10:46:46 AM",
+      "dateFinished": "Mar 23, 2015 10:46:46 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "number of continous \u0027update\u0027 for the same value",
+      "text": " \nmagic.showUpdateSameDistribution(z.input(\"poolname\",\"all\").toString,z.input(\"filter Of KEY\",\"all\").toString,z.input(\"min same\",0).toString.toFloat.toInt,z.input(\"max same\",4*1024*1024).toString.toFloat.toInt)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "repeatTimes",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "yAxis": {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "filter Of KEY": "all",
+          "max interval": 1000.0,
+          "min interval": 0.0,
+          "poolname": "all",
+          "max length of VALUE": 4194304.0,
+          "min length of VALUE": 0.0,
+          "max length": 4194304.0,
+          "min length": 0.0,
+          "max same": 4194304.0,
+          "min same": 0.0
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "min same": {
+            "name": "min same",
+            "displayName": "min same",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max same": {
+            "name": "max same",
+            "displayName": "max same",
+            "defaultValue": 4194304.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1426746713011_-1401666612",
+      "id": "20150319-143153_751303730",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "repeatTimes\tCount\n1\t811\n2\t196\n3\t41\n4\t6\n5\t3\n6\t2\n9\t1\n"
+      },
+      "dateCreated": "Mar 19, 2015 2:31:53 PM",
+      "dateStarted": "Mar 23, 2015 10:46:49 AM",
+      "dateFinished": "Mar 23, 2015 10:46:57 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "the interval of \u0027update\u0027 for the same value",
+      "text": " \nmagic.showUpdateSameIntervalDistribution(z.input(\"poolname\",\"all\").toString,z.input(\"filter Of KEY\",\"all\").toString,z.input(\"min interval\",0).toString.toDouble,z.input(\"max interval\",4*1024*1024).toString.toDouble)",
+      "config": {
+        "colWidth": 6.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Interval",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Interval",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "Count",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "filter Of KEY": "all",
+          "max interval": 1000.0,
+          "min interval": 0.0,
+          "poolname": "all",
+          "max length": 4194304.0,
+          "min length": 0.0
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter Of KEY": {
+            "name": "filter Of KEY",
+            "displayName": "filter Of KEY",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "min interval": {
+            "name": "min interval",
+            "displayName": "min interval",
+            "defaultValue": 0.0,
+            "hidden": false
+          },
+          "max interval": {
+            "name": "max interval",
+            "displayName": "max interval",
+            "defaultValue": 4194304.0,
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1426746732654_-1820258091",
+      "id": "20150319-143212_1863823760",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Interval\tCount\n0.0\t414\n0.1\t102\n0.2\t62\n0.3\t48\n0.4\t31\n0.5\t24\n0.6\t22\n0.7\t24\n0.8\t26\n0.9\t17\n1.0\t28\n1.1\t19\n1.2\t16\n1.3\t8\n1.4\t2\n1.5\t6\n1.6\t6\n1.7\t3\n1.8\t24\n1.9\t12\n2.0\t10\n2.1\t14\n2.2\t11\n2.3\t2\n2.4\t14\n2.5\t8\n2.6\t2\n2.7\t3\n2.8\t5\n2.9\t4\n3.0\t2\n3.1\t3\n3.3\t4\n3.4\t1\n3.6\t2\n3.8\t2\n4.0\t1\n4.1\t1\n4.2\t5\n4.3\t2\n4.5\t1\n4.7\t5\n4.8\t3\n4.9\t2\n5.0\t1\n5.1\t1\n5.2\t1\n5.4\t4\n5.5\t1\n5.6\t1\n5.8\t1\n6.2\t2\n6.8\t1\n7.2\t1\n7.3\t1\n7.5\t1\n7.7\t1\n7.8\t1\n8.1\t1\n8.2\t1\n8.3\t1\n8.4\t1\n8.6\t1\n8.8\t1\n8.9\t2\n9.0\t2\n9.1\t3\n9.3\t2\n9.4\t3\n9.6\t1\n9.7\t1\n9.8\t2\n10.0\t1\n10.1\t1\n10.3\t1\n10.4\t1\n10.5\t3\n10.6\t2\n10.7\t2\n10.8\t3\n11.0\t3\n11.1\t2\n11.2\t1\n11.3\t2\n11.5\t3\n11.6\t6\n11.7\t4\n11.8\t3\n11.9\t1\n12.0\t6\n12.1\t5\n12.2\t2\n12.3\t7\n12.4\t3\n12.5\t3\n12.6\t3\n12.7\t2\n12.8\t1\n12.9\t1\n13.0\t4\n13.1\t3\n13.2\t6\n13.3\t3\n13.4\t1\n13.5\t1\n13.7\t1\n14.0\t2\n14.1\t2\n14.2\t3\n14.3\t1\n14.9\t2\n15.0\t2\n15.1\t1\n15.2\t3\n15.3\t2\n15.4\t1\n15.5\t1\n15.6\t3\n15.7\t1\n15.8\t1\n15.9\t3\n16.1\t1\n16.3\t2\n16.4\t3\n16.5\t3\n16.6\t2\n16.7\t2\n16.8\t3\n17.0\t1\n17.1\t2\n17.2\t3\n17.3\t3\n17.4\t1\n17.5\t3\n17.6\t2\n17.7\t1\n17.8\t2\n17.9\t1\n18.0\t1\n18.2\t2\n18.3\t2\n18.4\t2\n18.7\t2\n18.8\t1\n19.0\t5\n19.3\t4\n19.4\t1\n19.6\t2\n19.7\t4\n19.8\t1\n19.9\t5\n20.0\t4\n20.2\t1\n20.3\t1\n20.4\t5\n20.5\t3\n20.6\t4\n20.7\t2\n20.8\t2\n20.9\t1\n21.0\t5\n21.2\t2\n21.3\t3\n21.4\t5\n21.6\t1\n21.7\t1\n21.8\t2\n21.9\t2\n22.0\t2\n22.1\t2\n22.5\t1\n22.6\t2\n22.7\t1\n22.9\t1\n23.1\t3\n23.2\t1\n23.3\t3\n23.5\t5\n23.6\t1\n23.7\t2\n23.8\t1\n23.9\t2\n24.1\t2\n24.2\t2\n24.3\t5\n24.4\t4\n24.5\t3\n24.6\t2\n24.7\t4\n24.8\t2\n24.9\t2\n25.0\t4\n25.1\t2\n25.2\t1\n25.3\t4\n25.4\t3\n25.5\t1\n25.6\t2\n25.7\t3\n25.8\t4\n25.9\t1\n26.0\t2\n26.1\t5\n26.2\t3\n26.3\t4\n26.5\t4\n26.6\t5\n26.7\t5\n26.8\t1\n26.9\t5\n27.0\t4\n27.1\t3\n27.2\t6\n27.3\t5\n27.4\t2\n27.5\t5\n27.6\t3\n27.7\t6\n27.9\t1\n28.0\t6\n28.1\t4\n28.2\t10\n28.3\t3\n28.4\t2\n28.5\t2\n28.6\t1\n28.7\t5\n28.8\t1\n28.9\t1\n29.0\t1\n29.1\t3\n29.2\t2\n29.3\t2\n29.4\t4\n29.5\t3\n29.6\t3\n29.9\t6\n30.0\t3\n30.1\t4\n30.2\t1\n30.3\t3\n30.4\t2\n30.5\t4\n30.6\t1\n30.7\t6\n30.8\t3\n31.0\t1\n31.1\t1\n31.2\t3\n31.3\t4\n31.4\t5\n31.5\t2\n31.7\t2\n31.8\t2\n31.9\t1\n32.0\t2\n32.1\t2\n32.2\t5\n32.3\t1\n32.5\t2\n32.6\t1\n32.7\t4\n32.8\t2\n32.9\t3\n33.0\t2\n33.1\t7\n33.2\t5\n33.3\t3\n33.4\t1\n33.5\t3\n33.6\t4\n33.7\t5\n33.8\t1\n33.9\t3\n34.0\t3\n34.1\t2\n34.2\t3\n34.3\t1\n34.4\t3\n34.5\t7\n34.6\t2\n34.7\t3\n34.8\t4\n34.9\t2\n35.0\t2\n35.1\t3\n35.2\t1\n35.3\t2\n35.4\t3\n35.5\t4\n35.6\t4\n35.7\t2\n35.8\t2\n35.9\t3\n36.1\t3\n36.2\t4\n36.3\t2\n36.4\t3\n36.6\t1\n36.7\t4\n36.8\t3\n37.0\t2\n37.1\t2\n37.2\t1\n37.3\t3\n37.4\t3\n37.5\t3\n37.6\t1\n37.7\t5\n37.8\t3\n37.9\t4\n38.0\t3\n38.1\t2\n38.2\t3\n38.4\t1\n38.5\t2\n38.6\t1\n38.7\t2\n38.8\t3\n38.9\t3\n39.0\t2\n39.1\t3\n39.2\t4\n39.3\t2\n39.4\t1\n39.5\t5\n39.6\t2\n39.7\t6\n39.8\t2\n39.9\t2\n40.1\t3\n40.2\t5\n40.3\t3\n40.4\t2\n40.5\t2\n40.6\t1\n40.7\t2\n40.8\t4\n40.9\t1\n41.0\t2\n41.1\t4\n41.2\t1\n41.3\t2\n41.4\t1\n41.5\t1\n41.6\t4\n41.7\t2\n41.9\t1\n42.0\t7\n42.1\t4\n42.3\t1\n42.4\t2\n42.5\t3\n42.6\t2\n42.7\t2\n42.8\t1\n42.9\t1\n43.0\t1\n43.1\t3\n43.2\t3\n43.5\t4\n43.6\t3\n43.7\t1\n43.9\t1\n44.0\t1\n44.2\t1\n44.3\t6\n44.4\t4\n44.5\t3\n44.6\t3\n44.7\t1\n44.8\t1\n44.9\t1\n45.0\t1\n45.2\t1\n45.3\t1\n45.4\t3\n45.5\t3\n45.6\t2\n45.7\t1\n45.9\t4\n46.0\t2\n46.1\t4\n46.2\t2\n46.3\t1\n46.5\t1\n46.7\t3\n46.8\t3\n46.9\t5\n47.0\t4\n47.1\t3\n47.2\t3\n47.4\t3\n47.5\t3\n47.6\t2\n47.7\t3\n47.8\t1\n47.9\t2\n48.1\t1\n48.2\t1\n48.3\t1\n48.4\t1\n48.5\t1\n49.0\t1\n49.3\t1\n49.5\t2\n49.6\t1\n49.8\t1\n50.0\t1\n50.1\t2\n50.3\t1\n50.4\t2\n50.5\t2\n50.6\t1\n50.7\t2\n50.8\t1\n50.9\t1\n51.0\t1\n51.1\t1\n51.2\t1\n51.5\t1\n52.2\t3\n52.5\t2\n52.6\t1\n52.7\t2\n52.8\t3\n52.9\t4\n53.0\t1\n53.1\t1\n53.2\t1\n53.3\t2\n53.4\t3\n53.5\t2\n53.6\t4\n53.7\t5\n53.8\t1\n53.9\t1\n54.0\t5\n54.1\t1\n54.2\t2\n54.3\t1\n54.4\t2\n54.5\t1\n54.6\t1\n54.7\t1\n54.8\t1\n55.0\t4\n55.1\t1\n55.2\t2\n55.4\t1\n55.5\t1\n55.6\t1\n55.7\t1\n55.8\t1\n55.9\t2\n56.1\t2\n56.2\t1\n56.3\t1\n56.4\t2\n56.6\t2\n56.7\t1\n56.8\t4\n56.9\t3\n57.0\t1\n57.1\t2\n57.3\t1\n57.4\t2\n57.5\t2\n57.6\t3\n57.7\t1\n57.8\t1\n57.9\t3\n58.0\t4\n58.1\t1\n58.2\t2\n58.3\t4\n58.4\t2\n58.6\t2\n58.7\t3\n58.8\t2\n58.9\t1\n59.0\t4\n59.1\t2\n59.2\t1\n59.3\t3\n59.4\t5\n59.5\t2\n59.6\t3\n59.8\t2\n59.9\t2\n60.0\t1\n60.1\t4\n60.2\t4\n60.3\t1\n60.4\t1\n60.5\t1\n60.6\t4\n60.7\t3\n60.8\t2\n60.9\t1\n61.0\t4\n61.1\t1\n61.2\t1\n61.3\t2\n61.4\t4\n61.5\t1\n61.6\t3\n61.8\t2\n61.9\t3\n62.0\t1\n62.1\t1\n62.2\t2\n62.3\t3\n62.4\t2\n62.5\t3\n62.6\t1\n62.7\t2\n62.8\t2\n62.9\t5\n63.0\t1\n63.1\t2\n63.2\t1\n63.4\t4\n63.5\t4\n63.6\t4\n63.7\t5\n63.8\t3\n64.0\t3\n64.1\t4\n64.2\t2\n64.3\t2\n64.4\t2\n64.5\t3\n64.7\t3\n64.8\t5\n65.0\t2\n65.3\t2\n65.6\t1\n65.8\t1\n66.3\t1\n66.5\t2\n66.7\t1\n66.9\t1\n67.0\t2\n67.2\t1\n67.3\t1\n67.4\t1\n67.9\t1\n68.0\t1\n68.1\t1\n68.2\t1\n68.3\t1\n68.4\t1\n68.6\t2\n68.8\t1\n68.9\t1\n69.0\t1\n69.1\t2\n69.2\t2\n69.4\t4\n69.5\t3\n69.6\t4\n69.8\t1\n69.9\t2\n70.0\t1\n70.1\t1\n70.2\t1\n70.3\t3\n70.4\t1\n70.5\t3\n70.6\t5\n70.7\t1\n70.8\t4\n70.9\t4\n71.0\t3\n71.1\t2\n71.2\t1\n71.3\t2\n71.4\t7\n71.5\t1\n71.6\t2\n71.7\t3\n71.8\t4\n71.9\t2\n72.0\t6\n72.1\t4\n72.2\t4\n72.3\t1\n72.4\t3\n72.5\t2\n72.6\t2\n72.7\t3\n72.8\t3\n72.9\t7\n73.0\t2\n73.1\t7\n73.2\t1\n73.3\t3\n73.5\t2\n73.6\t1\n73.7\t2\n73.8\t5\n73.9\t2\n74.0\t1\n74.1\t5\n74.2\t3\n74.3\t1\n74.4\t4\n74.5\t7\n74.6\t3\n74.7\t2\n74.8\t1\n74.9\t2\n75.1\t3\n75.3\t5\n75.4\t2\n75.5\t2\n75.6\t3\n75.7\t2\n75.8\t2\n75.9\t1\n76.0\t3\n76.1\t3\n76.2\t1\n76.3\t4\n76.4\t5\n76.5\t3\n76.6\t2\n76.7\t1\n76.8\t4\n76.9\t1\n77.0\t4\n77.1\t5\n77.2\t2\n77.3\t1\n77.4\t3\n77.5\t4\n77.6\t1\n77.7\t4\n77.9\t1\n78.0\t2\n78.1\t1\n78.2\t4\n78.3\t1\n78.4\t3\n78.6\t2\n78.8\t4\n78.9\t1\n79.0\t4\n79.1\t2\n79.2\t3\n79.3\t2\n79.4\t1\n79.5\t2\n79.6\t1\n79.7\t1\n79.9\t1\n80.0\t3\n80.1\t2\n80.3\t4\n80.4\t1\n80.6\t5\n80.7\t1\n80.8\t3\n80.9\t3\n81.1\t2\n81.2\t1\n81.4\t1\n81.5\t1\n81.6\t3\n81.7\t1\n81.9\t4\n82.1\t1\n82.2\t2\n82.3\t2\n82.4\t1\n82.5\t5\n82.6\t3\n82.7\t1\n82.8\t1\n82.9\t3\n83.0\t6\n83.1\t3\n83.2\t1\n83.3\t4\n83.4\t2\n83.5\t1\n83.6\t3\n83.8\t2\n83.9\t2\n84.1\t1\n84.2\t2\n84.3\t3\n84.4\t1\n84.6\t2\n84.7\t1\n84.8\t1\n84.9\t1\n85.0\t3\n85.1\t3\n85.3\t1\n85.4\t1\n85.5\t1\n85.6\t1\n85.8\t4\n85.9\t2\n86.0\t3\n86.1\t1\n86.2\t1\n86.3\t2\n86.4\t1\n86.6\t2\n86.7\t1\n86.8\t2\n86.9\t2\n87.0\t1\n87.1\t5\n87.2\t1\n87.3\t2\n87.5\t2\n87.6\t1\n87.7\t1\n87.8\t1\n87.9\t1\n88.0\t1\n88.1\t5\n88.2\t3\n88.3\t2\n88.4\t2\n88.5\t4\n88.8\t6\n88.9\t2\n89.0\t7\n89.1\t2\n89.2\t3\n89.3\t4\n89.4\t1\n89.5\t3\n89.6\t5\n89.7\t5\n89.8\t3\n89.9\t5\n90.0\t1\n90.1\t4\n90.2\t3\n90.3\t7\n90.4\t2\n90.5\t3\n90.6\t3\n90.7\t1\n90.8\t5\n90.9\t4\n91.0\t1\n91.1\t5\n91.4\t4\n91.6\t1\n91.7\t1\n91.8\t3\n91.9\t3\n92.0\t4\n92.1\t3\n92.2\t3\n92.4\t1\n92.5\t2\n92.6\t1\n92.7\t2\n92.8\t2\n92.9\t2\n93.0\t6\n93.1\t2\n93.2\t2\n93.3\t3\n93.4\t1\n93.5\t1\n93.6\t2\n93.7\t3\n93.8\t2\n93.9\t2\n94.0\t3\n94.1\t1\n94.2\t2\n94.3\t5\n94.4\t5\n94.5\t3\n94.6\t1\n94.8\t4\n94.9\t2\n95.0\t3\n95.1\t1\n95.2\t4\n95.3\t3\n95.4\t3\n95.5\t1\n95.6\t5\n95.7\t2\n95.8\t4\n95.9\t5\n96.0\t4\n96.1\t4\n96.2\t3\n96.3\t4\n96.4\t1\n96.5\t4\n96.6\t3\n96.7\t1\n96.8\t3\n96.9\t3\n97.0\t4\n97.1\t11\n97.2\t2\n97.3\t6\n97.4\t6\n97.5\t2\n97.6\t2\n97.7\t1\n97.8\t2\n97.9\t2\n98.0\t5\n98.1\t1\n98.2\t2\n98.3\t2\n98.4\t6\n98.5\t2\n98.7\t1\n98.8\t3\n98.9\t2\n99.1\t5\n99.2\t3\n99.3\t3\n99.4\t4\n99.5\t2\n99.6\t1\n99.7\t3\n99.8\t2\n99.9\t6\n100.0\t6\n100.1\t3\n100.2\t8\n100.3\t3\n100.4\t3\n100.5\t3\n100.6\t2\n100.7\t3\n100.8\t4\n100.9\t1\n101.0\t2\n101.1\t5\n101.2\t1\n101.4\t2\n101.5\t2\n101.6\t1\n101.7\t5\n101.9\t1\n102.0\t2\n102.1\t1\n102.2\t2\n102.4\t2\n102.5\t2\n102.6\t1\n102.7\t1\n102.9\t2\n103.0\t9\n103.1\t3\n103.4\t2\n103.5\t4\n103.6\t2\n103.7\t1\n103.8\t1\n104.0\t2\n104.1\t2\n104.5\t2\n104.6\t1\n104.7\t2\n105.5\t1\n105.8\t1\n106.5\t1\n106.8\t1\n107.2\t1\n107.5\t1\n107.6\t1\n108.5\t1\n108.6\t2\n109.2\t1\n109.3\t1\n109.4\t1\n109.5\t7\n109.6\t1\n109.7\t1\n109.8\t1\n109.9\t2\n110.0\t3\n110.1\t3\n110.2\t1\n110.5\t3\n110.6\t6\n110.7\t4\n110.8\t3\n110.9\t5\n111.0\t6\n111.3\t7\n111.4\t8\n111.5\t7\n111.6\t6\n111.7\t3\n111.8\t3\n111.9\t4\n112.0\t3\n112.2\t7\n112.3\t3\n112.4\t4\n112.5\t3\n112.6\t2\n112.7\t3\n112.8\t4\n112.9\t3\n113.0\t2\n113.1\t3\n113.2\t2\n113.3\t1\n113.5\t1\n113.6\t3\n113.7\t3\n113.8\t1\n113.9\t5\n114.1\t1\n114.2\t1\n114.3\t3\n114.4\t1\n114.5\t1\n114.7\t1\n115.0\t1\n115.1\t1\n115.3\t1\n115.4\t2\n115.6\t1\n115.7\t1\n116.0\t1\n116.2\t1\n116.3\t1\n116.4\t1\n116.5\t2\n116.8\t1\n116.9\t4\n117.1\t2\n117.2\t1\n117.3\t1\n117.4\t1\n117.5\t1\n117.6\t1\n117.7\t1\n117.8\t1\n117.9\t1\n118.1\t2\n118.2\t2\n118.3\t2\n118.4\t3\n118.5\t4\n118.6\t1\n118.7\t2\n118.9\t2\n119.0\t10\n119.1\t2\n119.2\t4\n119.3\t5\n119.4\t2\n119.5\t2\n119.6\t2\n119.7\t2\n119.8\t1\n119.9\t4\n120.0\t2\n120.1\t3\n120.2\t1\n120.3\t4\n120.4\t3\n120.5\t2\n120.6\t4\n120.7\t4\n120.8\t3\n120.9\t4\n121.0\t3\n121.1\t2\n121.2\t2\n121.3\t1\n121.4\t3\n121.5\t2\n121.6\t5\n121.7\t1\n121.8\t3\n121.9\t2\n122.0\t2\n122.1\t2\n122.2\t1\n122.3\t3\n122.4\t1\n122.5\t2\n122.6\t2\n122.7\t2\n122.8\t3\n122.9\t1\n123.0\t1\n123.4\t1\n123.6\t1\n123.9\t1\n124.0\t2\n124.3\t3\n124.5\t1\n124.6\t2\n124.9\t2\n125.0\t1\n125.3\t1\n125.5\t1\n125.6\t2\n125.7\t2\n125.9\t1\n126.0\t1\n126.1\t3\n126.3\t2\n126.5\t3\n126.7\t4\n126.9\t1\n127.0\t1\n127.1\t1\n127.2\t2\n127.3\t1\n127.5\t2\n127.7\t3\n127.8\t1\n127.9\t3\n128.0\t1\n128.1\t4\n128.2\t1\n128.3\t1\n128.4\t1\n128.5\t1\n128.6\t1\n128.7\t3\n128.8\t2\n128.9\t2\n129.0\t2\n129.1\t1\n129.2\t5\n129.3\t3\n129.4\t3\n129.5\t1\n129.6\t1\n129.7\t1\n129.8\t2\n129.9\t3\n130.0\t2\n130.1\t1\n130.2\t4\n130.5\t4\n130.7\t1\n130.8\t3\n130.9\t1\n131.2\t2\n131.4\t2\n131.5\t2\n131.7\t1\n131.8\t1\n132.0\t1\n132.2\t2\n132.8\t1\n132.9\t3\n133.0\t3\n133.1\t1\n133.5\t1\n133.7\t1\n133.8\t2\n133.9\t1\n134.1\t1\n134.4\t4\n134.6\t1\n134.7\t3\n134.8\t1\n135.2\t2\n135.3\t4\n135.4\t3\n135.5\t1\n135.6\t2\n135.8\t1\n135.9\t1\n136.0\t1\n136.1\t1\n136.2\t2\n136.3\t1\n136.4\t4\n136.8\t1\n137.0\t2\n137.1\t4\n137.2\t1\n137.3\t2\n137.6\t2\n137.7\t1\n137.8\t1\n137.9\t2\n138.0\t1\n138.4\t1\n138.8\t4\n139.4\t2\n139.5\t1\n139.6\t1\n139.7\t1\n139.8\t2\n139.9\t2\n140.0\t1\n140.1\t1\n140.2\t1\n140.4\t2\n140.5\t3\n140.6\t2\n140.7\t4\n140.8\t4\n140.9\t3\n141.0\t1\n141.1\t3\n141.2\t2\n141.3\t4\n141.4\t4\n141.5\t2\n141.6\t2\n141.7\t3\n141.8\t4\n142.0\t3\n142.1\t3\n142.2\t5\n142.4\t3\n142.5\t4\n142.6\t3\n142.7\t3\n142.8\t2\n142.9\t5\n143.0\t2\n143.1\t2\n143.2\t3\n143.3\t3\n143.4\t3\n143.5\t4\n143.6\t2\n143.7\t3\n143.8\t2\n143.9\t3\n144.0\t1\n144.3\t2\n144.5\t3\n144.6\t4\n144.7\t3\n144.8\t2\n144.9\t1\n145.0\t2\n145.1\t5\n145.2\t3\n145.4\t1\n145.5\t1\n145.6\t5\n145.7\t1\n145.8\t1\n145.9\t4\n146.0\t4\n146.1\t3\n146.2\t1\n146.3\t7\n146.4\t1\n146.5\t5\n146.6\t4\n146.7\t4\n146.8\t2\n146.9\t2\n147.0\t4\n147.1\t1\n147.2\t3\n147.3\t4\n147.4\t2\n147.5\t2\n147.7\t4\n147.8\t4\n147.9\t2\n148.0\t2\n148.1\t3\n148.2\t2\n148.3\t3\n148.4\t1\n148.6\t2\n148.8\t4\n148.9\t5\n149.0\t1\n149.1\t1\n149.2\t7\n149.5\t1\n149.6\t1\n149.7\t3\n149.9\t3\n150.1\t1\n150.3\t3\n150.5\t2\n150.6\t4\n150.7\t2\n150.8\t1\n151.0\t2\n151.5\t1\n151.8\t3\n152.0\t1\n152.3\t1\n152.5\t1\n152.7\t1\n152.9\t1\n153.1\t1\n153.3\t1\n153.4\t1\n153.5\t1\n153.6\t1\n153.9\t1\n154.1\t1\n154.2\t1\n154.7\t1\n154.8\t1\n155.8\t1\n155.9\t1\n156.2\t1\n156.4\t1\n156.5\t1\n156.9\t1\n157.8\t1\n158.0\t2\n158.7\t1\n158.8\t1\n159.0\t1\n159.1\t1\n159.3\t2\n160.2\t1\n160.5\t1\n160.6\t5\n160.7\t1\n160.9\t1\n161.0\t1\n161.7\t1\n161.8\t1\n161.9\t1\n162.0\t1\n162.2\t2\n162.4\t1\n162.5\t2\n162.6\t2\n162.7\t2\n162.8\t2\n162.9\t1\n163.0\t3\n163.3\t3\n163.4\t2\n163.5\t2\n163.7\t1\n163.8\t1\n164.0\t2\n164.1\t2\n164.2\t1\n164.5\t5\n164.6\t2\n164.7\t3\n164.8\t2\n164.9\t5\n165.0\t2\n165.1\t1\n165.2\t1\n165.5\t4\n165.6\t5\n165.7\t2\n165.8\t4\n165.9\t2\n166.0\t4\n166.2\t2\n166.3\t3\n166.4\t3\n166.5\t1\n166.6\t3\n166.8\t3\n166.9\t2\n167.0\t5\n167.1\t4\n167.2\t1\n167.5\t1\n167.6\t1\n167.7\t2\n167.8\t4\n168.0\t1\n168.1\t3\n168.2\t2\n168.3\t4\n168.4\t2\n168.5\t1\n168.6\t1\n168.7\t1\n168.8\t2\n169.0\t2\n169.1\t3\n169.2\t2\n169.3\t2\n169.4\t1\n169.5\t4\n169.6\t3\n169.8\t3\n170.0\t3\n170.4\t3\n170.6\t1\n170.7\t1\n170.8\t1\n170.9\t3\n171.1\t1\n171.2\t2\n171.4\t1\n171.5\t1\n171.6\t1\n171.8\t1\n171.9\t1\n172.4\t1\n172.6\t2\n172.7\t1\n172.8\t2\n173.0\t1\n173.1\t1\n173.2\t2\n173.5\t1\n173.7\t1\n173.8\t1\n173.9\t1\n174.0\t1\n174.1\t1\n174.2\t1\n174.5\t1\n174.9\t2\n175.2\t1\n175.6\t1\n175.8\t1\n176.0\t1\n176.4\t2\n176.5\t2\n176.7\t1\n177.1\t1\n177.3\t1\n177.5\t2\n177.6\t1\n177.8\t1\n178.0\t2\n178.1\t1\n178.2\t4\n178.3\t3\n178.4\t3\n178.5\t4\n178.6\t4\n178.7\t2\n178.8\t4\n178.9\t4\n179.0\t2\n179.2\t2\n179.3\t3\n179.4\t4\n179.5\t6\n179.6\t1\n179.7\t3\n179.8\t8\n179.9\t6\n180.0\t6\n180.1\t4\n180.2\t2\n180.3\t4\n180.4\t4\n180.5\t5\n180.7\t2\n180.8\t5\n180.9\t2\n181.0\t3\n181.1\t1\n181.2\t3\n181.4\t3\n181.5\t3\n181.6\t2\n181.7\t3\n181.8\t7\n181.9\t9\n182.0\t3\n182.1\t1\n182.2\t2\n182.3\t4\n182.4\t1\n182.6\t5\n182.7\t1\n182.8\t2\n182.9\t2\n183.0\t1\n183.1\t2\n183.4\t3\n183.5\t1\n183.6\t2\n183.7\t2\n183.8\t4\n183.9\t1\n184.0\t4\n184.1\t5\n184.2\t1\n184.3\t2\n184.4\t3\n184.5\t4\n184.6\t3\n184.7\t5\n184.8\t2\n184.9\t4\n185.0\t3\n185.1\t2\n185.2\t5\n185.3\t3\n185.4\t5\n185.5\t3\n185.6\t2\n185.7\t3\n186.0\t2\n186.1\t3\n186.2\t3\n186.3\t3\n186.4\t2\n186.5\t4\n186.6\t2\n186.7\t4\n186.8\t2\n186.9\t3\n187.0\t3\n187.1\t6\n187.2\t5\n187.3\t3\n187.4\t4\n187.5\t2\n187.6\t5\n187.7\t2\n187.8\t2\n187.9\t3\n188.0\t2\n188.1\t2\n188.2\t1\n188.3\t2\n188.4\t1\n188.5\t1\n188.6\t1\n188.8\t5\n188.9\t3\n189.0\t3\n189.1\t2\n189.2\t4\n189.4\t2\n189.5\t1\n189.6\t1\n189.7\t1\n189.8\t2\n189.9\t5\n190.0\t1\n190.1\t2\n190.2\t2\n190.3\t3\n190.4\t1\n190.5\t1\n190.6\t2\n190.7\t1\n190.8\t1\n190.9\t2\n191.1\t1\n191.2\t1\n191.3\t2\n191.4\t1\n191.5\t1\n191.6\t1\n191.7\t3\n191.8\t2\n191.9\t5\n192.0\t4\n192.1\t1\n192.2\t1\n192.3\t2\n192.4\t7\n192.5\t4\n192.6\t4\n192.7\t6\n192.8\t4\n192.9\t6\n193.0\t3\n193.1\t5\n193.2\t2\n193.3\t7\n193.5\t9\n193.6\t3\n193.7\t4\n193.8\t7\n193.9\t10\n194.0\t7\n194.1\t5\n194.2\t9\n194.3\t7\n194.4\t5\n194.5\t9\n194.6\t6\n194.7\t10\n194.8\t7\n194.9\t4\n195.0\t9\n195.1\t3\n195.2\t8\n195.3\t2\n195.4\t5\n195.5\t3\n195.6\t10\n195.7\t6\n195.8\t7\n195.9\t7\n196.0\t7\n196.1\t7\n196.2\t2\n196.3\t3\n196.4\t8\n196.5\t12\n196.6\t7\n196.7\t13\n196.8\t8\n196.9\t2\n197.0\t6\n197.1\t9\n197.2\t5\n197.3\t10\n197.4\t8\n197.5\t9\n197.6\t7\n197.7\t10\n197.8\t8\n197.9\t8\n198.0\t12\n198.1\t11\n198.2\t7\n198.3\t6\n198.4\t9\n198.5\t5\n198.6\t3\n198.7\t17\n198.8\t4\n198.9\t12\n199.0\t6\n199.1\t7\n199.2\t8\n199.3\t10\n199.4\t7\n199.5\t8\n199.6\t8\n199.7\t7\n199.8\t8\n199.9\t9\n200.0\t11\n200.1\t7\n200.2\t5\n200.3\t4\n200.4\t7\n200.5\t9\n200.6\t4\n200.7\t6\n200.8\t5\n200.9\t3\n201.0\t10\n201.1\t7\n201.2\t6\n201.3\t3\n201.4\t2\n201.5\t3\n201.6\t2\n201.7\t4\n201.8\t8\n201.9\t3\n202.0\t5\n202.1\t4\n202.2\t4\n202.3\t3\n202.4\t1\n202.5\t2\n202.6\t2\n202.7\t1\n202.8\t5\n202.9\t2\n203.0\t2\n203.1\t1\n203.2\t4\n203.3\t2\n203.4\t1\n203.5\t2\n203.6\t4\n203.7\t2\n203.8\t3\n203.9\t2\n204.0\t1\n204.1\t3\n204.2\t2\n204.3\t3\n204.4\t2\n204.6\t1\n204.7\t1\n204.8\t2\n204.9\t2\n205.0\t3\n205.1\t7\n205.2\t3\n205.3\t2\n205.4\t2\n205.5\t5\n205.6\t2\n205.7\t2\n205.8\t3\n205.9\t4\n206.0\t4\n206.1\t5\n206.2\t4\n206.3\t2\n206.4\t7\n206.5\t6\n206.6\t6\n206.7\t9\n206.8\t3\n206.9\t6\n207.0\t4\n207.1\t11\n207.2\t6\n207.3\t3\n207.4\t7\n207.5\t9\n207.6\t4\n207.7\t5\n207.8\t3\n207.9\t4\n208.0\t3\n208.1\t2\n208.2\t5\n208.3\t7\n208.4\t3\n208.5\t7\n208.6\t5\n208.7\t3\n208.8\t5\n208.9\t4\n209.0\t5\n209.1\t4\n209.2\t5\n209.3\t5\n209.4\t3\n209.5\t5\n209.6\t4\n209.7\t4\n209.8\t5\n209.9\t7\n210.0\t6\n210.1\t7\n210.2\t3\n210.3\t4\n210.5\t7\n210.6\t2\n210.7\t5\n210.8\t3\n210.9\t6\n211.0\t6\n211.1\t4\n211.2\t4\n211.3\t7\n211.4\t4\n211.5\t4\n211.6\t5\n211.7\t7\n211.8\t4\n211.9\t6\n212.0\t4\n212.1\t5\n212.2\t2\n212.3\t5\n212.4\t1\n212.5\t4\n212.6\t1\n212.7\t1\n212.8\t1\n212.9\t2\n213.0\t5\n213.1\t5\n213.2\t3\n213.3\t4\n213.4\t2\n213.5\t2\n213.6\t6\n213.7\t2\n213.8\t3\n213.9\t2\n214.0\t4\n214.1\t2\n214.2\t2\n214.3\t6\n214.5\t2\n214.6\t4\n214.7\t1\n214.8\t3\n214.9\t5\n215.0\t4\n215.1\t5\n215.2\t2\n215.3\t2\n215.4\t4\n215.5\t1\n215.6\t2\n215.7\t2\n215.8\t1\n215.9\t3\n216.0\t4\n216.1\t2\n216.2\t2\n216.3\t5\n216.4\t1\n216.5\t3\n216.6\t4\n216.7\t1\n216.8\t3\n216.9\t3\n217.0\t5\n217.1\t2\n217.2\t5\n217.3\t3\n217.4\t7\n217.5\t5\n217.6\t4\n217.7\t4\n217.8\t5\n217.9\t2\n218.0\t4\n218.2\t1\n218.3\t6\n218.4\t2\n218.5\t3\n218.6\t3\n218.7\t3\n218.8\t3\n218.9\t1\n219.0\t6\n219.2\t5\n219.3\t1\n219.4\t2\n219.5\t1\n219.6\t1\n219.7\t2\n219.8\t1\n219.9\t2\n220.0\t2\n220.1\t4\n220.2\t1\n220.4\t1\n220.6\t3\n220.7\t2\n220.9\t2\n221.0\t1\n221.1\t3\n221.2\t1\n221.3\t2\n221.8\t2\n221.9\t1\n222.0\t4\n222.1\t1\n222.2\t2\n222.3\t1\n222.4\t4\n222.5\t5\n222.6\t7\n222.8\t6\n222.9\t7\n223.0\t6\n223.1\t8\n223.2\t9\n223.3\t4\n223.4\t9\n223.5\t3\n223.6\t6\n223.7\t8\n223.8\t12\n223.9\t11\n224.0\t13\n224.1\t10\n224.2\t5\n224.3\t10\n224.4\t12\n224.5\t13\n224.6\t13\n224.7\t13\n224.8\t8\n224.9\t11\n225.0\t11\n225.1\t9\n225.2\t16\n225.3\t10\n225.4\t8\n225.5\t17\n225.6\t9\n225.7\t7\n225.8\t11\n225.9\t13\n226.0\t11\n226.1\t13\n226.2\t12\n226.3\t12\n226.4\t12\n226.5\t6\n226.6\t7\n226.7\t10\n226.8\t5\n226.9\t7\n227.0\t7\n227.1\t10\n227.2\t10\n227.3\t4\n227.4\t5\n227.5\t7\n227.6\t5\n227.7\t8\n227.8\t5\n227.9\t7\n228.0\t10\n228.1\t5\n228.2\t10\n228.3\t7\n228.4\t8\n228.5\t11\n228.6\t3\n228.7\t4\n228.8\t5\n228.9\t4\n229.0\t6\n229.1\t4\n229.2\t8\n229.3\t3\n229.4\t6\n229.5\t1\n229.6\t4\n229.7\t8\n229.8\t6\n229.9\t10\n230.0\t5\n230.1\t5\n230.2\t7\n230.3\t5\n230.4\t5\n230.5\t4\n230.6\t3\n230.7\t9\n230.8\t9\n230.9\t11\n231.0\t12\n231.1\t8\n231.2\t8\n231.3\t8\n231.4\t4\n231.5\t8\n231.6\t6\n231.7\t7\n231.8\t9\n231.9\t10\n232.0\t9\n232.1\t3\n232.2\t7\n232.3\t8\n232.4\t9\n232.5\t6\n232.6\t7\n232.7\t7\n232.8\t9\n232.9\t9\n233.0\t7\n233.1\t6\n233.2\t6\n233.3\t10\n233.4\t7\n233.5\t12\n233.6\t4\n233.7\t11\n233.8\t5\n233.9\t7\n234.0\t10\n234.1\t8\n234.2\t7\n234.3\t5\n234.4\t6\n234.5\t5\n234.6\t5\n234.7\t7\n234.8\t7\n234.9\t10\n235.0\t12\n235.1\t10\n235.2\t4\n235.3\t4\n235.4\t7\n235.5\t3\n235.6\t11\n235.7\t8\n235.8\t6\n235.9\t10\n236.0\t8\n236.1\t4\n236.2\t8\n236.3\t10\n236.4\t8\n236.5\t1\n236.6\t9\n236.7\t8\n236.8\t7\n236.9\t4\n237.0\t9\n237.1\t3\n237.2\t6\n237.3\t10\n237.4\t7\n237.5\t6\n237.6\t12\n237.7\t11\n237.8\t5\n237.9\t9\n238.0\t9\n238.1\t8\n238.2\t9\n238.3\t6\n238.4\t6\n238.5\t6\n238.6\t3\n238.7\t5\n238.8\t7\n238.9\t9\n239.0\t5\n239.1\t8\n239.2\t7\n239.3\t9\n239.4\t5\n239.5\t7\n239.6\t9\n239.7\t8\n239.8\t4\n239.9\t3\n240.0\t10\n240.1\t18\n240.2\t6\n240.3\t2\n240.4\t4\n240.5\t10\n240.6\t4\n240.7\t5\n240.8\t4\n240.9\t5\n241.0\t4\n241.1\t7\n241.2\t2\n241.3\t7\n241.4\t6\n241.5\t7\n241.6\t6\n241.7\t2\n241.8\t7\n241.9\t5\n242.0\t7\n242.1\t19\n242.2\t9\n242.3\t1\n242.4\t4\n242.5\t1\n242.6\t5\n242.7\t6\n242.8\t4\n242.9\t3\n243.0\t3\n243.1\t5\n243.2\t2\n243.3\t7\n243.4\t6\n243.5\t3\n243.6\t4\n243.7\t7\n243.8\t2\n243.9\t1\n244.0\t11\n244.1\t16\n244.2\t7\n244.3\t6\n244.4\t5\n244.5\t8\n244.6\t3\n244.7\t1\n244.8\t5\n244.9\t2\n245.0\t2\n245.1\t2\n245.2\t2\n245.3\t1\n245.4\t1\n245.5\t2\n245.6\t1\n245.7\t4\n245.8\t3\n245.9\t4\n246.0\t2\n246.1\t2\n246.2\t1\n246.3\t1\n246.5\t1\n246.7\t1\n247.0\t2\n247.1\t1\n247.2\t2\n247.3\t1\n247.5\t1\n247.7\t1\n247.8\t2\n247.9\t1\n248.0\t1\n248.4\t1\n248.7\t1\n248.9\t1\n249.1\t1\n249.3\t2\n249.5\t1\n249.6\t2\n249.8\t2\n249.9\t3\n250.1\t2\n250.2\t2\n250.3\t3\n250.5\t1\n250.6\t3\n250.7\t2\n250.8\t4\n250.9\t2\n251.1\t2\n251.2\t2\n251.3\t1\n251.4\t2\n251.5\t3\n251.6\t4\n251.7\t1\n251.8\t3\n251.9\t3\n252.0\t1\n252.1\t1\n252.2\t5\n252.3\t3\n252.4\t4\n252.5\t4\n252.6\t1\n252.7\t2\n252.8\t5\n252.9\t3\n253.0\t2\n253.1\t4\n253.2\t4\n253.5\t1\n253.6\t1\n253.7\t2\n253.8\t1\n254.0\t1\n254.2\t1\n254.3\t2\n254.4\t2\n254.5\t3\n254.6\t3\n254.7\t1\n254.8\t2\n255.1\t1\n256.1\t1\n256.6\t1\n257.8\t1\n258.5\t1\n259.0\t1\n259.3\t1\n259.6\t1\n259.7\t1\n260.1\t1\n260.8\t2\n261.0\t2\n261.8\t1\n262.0\t1\n262.2\t1\n262.3\t2\n263.2\t1\n272.0\t1\n272.4\t1\n292.1\t1\n330.7\t1\n331.2\t1\n343.1\t1\n354.6\t1\n360.0\t1\n397.5\t1\n397.9\t1\n398.0\t1\n398.2\t1\n398.3\t1\n398.4\t2\n398.5\t2\n398.6\t1\n398.7\t2\n398.8\t1\n399.0\t2\n399.1\t2\n399.2\t1\n399.3\t1\n399.4\t2\n399.5\t2\n399.7\t1\n400.0\t1\n400.1\t1\n400.2\t1\n400.3\t1\n400.4\t5\n400.5\t2\n400.6\t2\n400.8\t1\n400.9\t1\n401.4\t2\n401.5\t2\n401.6\t4\n401.7\t1\n401.8\t1\n402.0\t2\n402.3\t1\n402.4\t1\n402.5\t3\n402.6\t1\n403.3\t1\n403.5\t1\n405.4\t1\n405.5\t1\n405.9\t1\n406.0\t1\n406.2\t1\n408.0\t1\n413.1\t1\n414.9\t1\n415.4\t2\n415.8\t1\n416.1\t1\n416.4\t1\n416.5\t1\n416.9\t1\n417.1\t3\n417.2\t1\n417.3\t2\n417.5\t3\n417.6\t2\n417.7\t1\n418.0\t2\n418.3\t1\n418.5\t2\n418.6\t2\n418.7\t1\n418.8\t1\n418.9\t1\n419.0\t3\n419.1\t2\n419.2\t2\n419.4\t2\n419.8\t1\n420.2\t1\n421.2\t1\n421.9\t1\n422.7\t1\n423.8\t1\n425.7\t2\n426.2\t1\n426.9\t1\n428.0\t1\n428.8\t2\n430.4\t2\n430.6\t1\n430.9\t1\n431.2\t4\n431.3\t1\n431.4\t1\n431.5\t1\n431.8\t1\n431.9\t1\n432.0\t6\n432.1\t1\n432.2\t3\n432.3\t1\n432.5\t2\n432.6\t1\n432.8\t4\n432.9\t1\n433.0\t3\n433.2\t2\n433.3\t3\n433.7\t1\n433.8\t2\n434.1\t1\n434.2\t1\n434.3\t3\n434.4\t3\n434.6\t1\n434.8\t1\n435.1\t2\n435.3\t1\n435.4\t1\n435.5\t1\n435.7\t1\n435.9\t1\n436.0\t1\n436.3\t1\n437.9\t1\n"
+      },
+      "dateCreated": "Mar 19, 2015 2:32:12 PM",
+      "dateStarted": "Mar 23, 2015 10:46:49 AM",
+      "dateFinished": "Mar 23, 2015 10:46:58 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n###8. Show Data Using A SQL",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1426735935162_-1085786570",
+      "id": "20150319-113215_210909218",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch3\u003e8. Show Data Using A SQL\u003c/h3\u003e\n"
+      },
+      "dateCreated": "Mar 19, 2015 11:32:15 AM",
+      "dateStarted": "Mar 23, 2015 5:50:05 PM",
+      "dateFinished": "Mar 23, 2015 5:50:05 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "title": "show data using a SQL",
+      "text": "magic.sql(z.input(\"SQL (limit 1000 if no limit):\",\"select key,len from magic where len \u003e 1000\").toString)",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 294.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "unique_keys",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "unique_keys",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": true,
+        "title": true
+      },
+      "settings": {
+        "params": {
+          "sql": "select  key as aaa, len as length from magic where len \u003e 100 and len \u003c300 limit 100",
+          "sql (limit 1000 if no limit found)": "select key,len from magic where len \u003e 1000",
+          "SQL statement(limit 1000 if no limit found):": "select key,len from magic where len \u003e 1000",
+          "SQL (limit 1000 if no limit found):": "select len, count(key) from magic where len \u003e 1000",
+          "SQL (limit 1000 if no limit):": "select distinct poolName as unique_keys  from magic"
+        },
+        "forms": {
+          "SQL (limit 1000 if no limit):": {
+            "name": "SQL (limit 1000 if no limit):",
+            "displayName": "SQL (limit 1000 if no limit):",
+            "defaultValue": "select key,len from magic where len \u003e 1000",
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1423725334083_-1572465451",
+      "id": "20150212-151534_1055732142",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "unique_keys\nyihaodian_promotion-write-ycache\nfrontpage-homepage-data\nfrontpage-detail\nyihaodian_gss\nidc_ycache_example\nyihaodian_backend-sso\nfrontpage-try\nshareservice_product-basic\nmerchant-shangjia-activity\nsby\ngos_lookup_datacache\nfront-shopping-cart\nInnovationCenter_weibo\nfront-shopping-session\nfront-unions\nyihaodian_so2do\nfrontpage-cms-data\nfront-shopping-data\npms\ninshop\nsearch-mars\nsearch\napollo\nprecision_ad_platform\nyihaodian_tms\nyhd_mingpin-front\nfrontpage-pe\ngroupon-cache\nfront-passport-service\nbackend-custinfo\nyihaodian_ad\ninshop_shop\nyihaodian_scm-scs\nwl2_venus\nfrontpage-homepage-session\nbackend-service\n"
+      },
+      "dateCreated": "Feb 12, 2015 3:15:34 PM",
+      "dateStarted": "Mar 23, 2015 5:51:01 PM",
+      "dateFinished": "Mar 23, 2015 5:51:04 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n###8. Show result(or error) distribution by time.",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1426820435230_-1532409395",
+      "id": "20150320-110035_593492049",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch3\u003e8. Show result(or error) distribution by time.\u003c/h3\u003e\n"
+      },
+      "dateCreated": "Mar 20, 2015 11:00:35 AM",
+      "dateStarted": "Mar 23, 2015 5:57:35 PM",
+      "dateFinished": "Mar 23, 2015 5:57:35 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": " magic.showErrorDistribution(z.input(\"poolname\",\"all\").toString, z.input(\"filter of key\",\"all\").toString, \n z.input(\"command\",\"all\").toString, z.input(\"Result string\",\"all\").toString, magic.str2ts(z.input(\"start time\",\"1970/01/01 00:00:00\").toString), \n magic.str2ts(z.input(\"end time\",\"2015/01/01 00:00:00\").toString)) \n",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "multiBarChart",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [
+            {
+              "name": "Time",
+              "index": 0.0,
+              "aggr": "sum"
+            }
+          ],
+          "values": [
+            {
+              "name": "ErrorCount",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          ],
+          "groups": [],
+          "scatter": {
+            "xAxis": {
+              "name": "Time",
+              "index": 0.0,
+              "aggr": "sum"
+            },
+            "yAxis": {
+              "name": "ErrorCount",
+              "index": 1.0,
+              "aggr": "sum"
+            }
+          }
+        },
+        "editorHide": false,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {
+          "command": "all",
+          "error string": "STORED",
+          "filter of key": "all",
+          "poolname": "all",
+          "Result string": "STORED",
+          "end time": "2015/01/01 00:00:00",
+          "start time": "1970/01/01 00:00:00"
+        },
+        "forms": {
+          "poolname": {
+            "name": "poolname",
+            "displayName": "poolname",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "filter of key": {
+            "name": "filter of key",
+            "displayName": "filter of key",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "command": {
+            "name": "command",
+            "displayName": "command",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "Result string": {
+            "name": "Result string",
+            "displayName": "Result string",
+            "defaultValue": "all",
+            "hidden": false
+          },
+          "start time": {
+            "name": "start time",
+            "displayName": "start time",
+            "defaultValue": "1970/01/01 00:00:00",
+            "hidden": false
+          },
+          "end time": {
+            "name": "end time",
+            "displayName": "end time",
+            "defaultValue": "2015/01/01 00:00:00",
+            "hidden": false
+          }
+        }
+      },
+      "jobName": "paragraph_1426131289761_-1096121200",
+      "id": "20150312-113449_312289389",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TABLE",
+        "msg": "Time\tErrorCount\n0.2\t1\n1.3\t10\n2.5\t4\n2.6\t1\n3.5\t4\n3.6\t1\n4.1\t5\n4.5\t1\n4.6\t1\n6.1\t2\n6.4\t1\n8.4\t4\n10.1\t7\n10.3\t1\n10.5\t3\n10.7\t3\n11.3\t3\n11.4\t2\n11.5\t2\n11.7\t1\n11.8\t1\n11.9\t6\n12.2\t2\n12.3\t2\n12.4\t1\n12.7\t7\n13.4\t4\n13.5\t16\n13.7\t1\n13.8\t1\n13.9\t12\n15.1\t1\n15.2\t4\n15.3\t2\n15.4\t1\n15.9\t1\n16.5\t7\n16.8\t1\n17.1\t3\n17.2\t2\n17.3\t1\n17.4\t2\n17.5\t4\n17.7\t1\n18.1\t4\n18.2\t7\n18.3\t4\n18.4\t1\n18.6\t1\n18.7\t2\n18.8\t3\n18.9\t1\n19.6\t1\n19.8\t1\n19.9\t2\n20.1\t9\n20.4\t7\n20.5\t2\n20.6\t11\n20.7\t1\n20.8\t1\n21.1\t2\n21.2\t1\n21.3\t4\n22.4\t1\n22.5\t2\n23.7\t1\n24.3\t3\n24.4\t2\n24.7\t6\n24.8\t3\n24.9\t3\n25.1\t2\n25.2\t5\n25.3\t3\n25.5\t3\n25.6\t1\n25.8\t2\n25.9\t4\n26.1\t4\n26.3\t2\n26.4\t3\n26.5\t6\n26.6\t10\n26.8\t2\n26.9\t1\n27.4\t2\n27.7\t1\n27.9\t2\n28.1\t1\n28.3\t1\n28.5\t2\n28.6\t2\n28.7\t4\n29.1\t3\n29.2\t3\n29.3\t2\n29.5\t2\n29.6\t3\n29.7\t3\n29.8\t1\n30.1\t2\n30.3\t4\n30.4\t2\n30.5\t2\n30.6\t2\n30.7\t1\n30.8\t1\n31.2\t1\n31.3\t2\n31.4\t1\n31.5\t1\n31.7\t1\n32.1\t1\n32.4\t4\n32.5\t11\n32.6\t5\n32.7\t2\n32.8\t8\n33.3\t10\n33.4\t6\n33.5\t2\n33.6\t7\n33.7\t5\n33.8\t9\n33.9\t2\n34.1\t10\n34.2\t9\n34.3\t6\n34.5\t6\n34.6\t5\n34.7\t3\n34.8\t1\n34.9\t4\n35.1\t2\n35.6\t2\n35.7\t1\n35.9\t1\n36.1\t5\n36.5\t1\n36.6\t1\n36.7\t17\n36.9\t1\n37.1\t5\n37.2\t4\n37.3\t5\n37.4\t2\n37.5\t3\n37.6\t6\n37.7\t1\n37.8\t6\n37.9\t3\n38.1\t1\n38.2\t6\n38.3\t5\n38.4\t4\n38.5\t9\n38.6\t1\n38.7\t5\n38.8\t1\n38.9\t5\n39.1\t5\n39.2\t7\n39.3\t3\n39.4\t4\n39.5\t6\n39.6\t6\n39.7\t6\n39.8\t7\n39.9\t7\n40.1\t7\n40.2\t7\n40.3\t7\n40.4\t8\n41.1\t3\n41.2\t2\n41.3\t1\n41.4\t5\n41.5\t7\n41.6\t6\n41.7\t8\n41.9\t9\n42.1\t6\n42.2\t5\n42.3\t2\n42.4\t6\n42.6\t9\n42.7\t7\n42.8\t6\n42.9\t10\n43.1\t3\n43.3\t4\n43.4\t4\n43.5\t5\n43.6\t7\n43.7\t4\n43.8\t1\n43.9\t3\n44.1\t2\n44.2\t5\n44.3\t6\n44.4\t3\n44.5\t6\n44.6\t4\n44.7\t2\n44.8\t2\n44.9\t5\n45.1\t4\n45.2\t3\n45.3\t2\n45.4\t6\n45.5\t4\n45.6\t2\n45.7\t1\n45.9\t1\n46.1\t3\n46.2\t4\n46.3\t5\n46.4\t4\n46.5\t4\n46.6\t7\n46.7\t3\n46.9\t4\n47.1\t8\n47.2\t6\n47.3\t11\n47.4\t4\n47.5\t4\n47.6\t2\n47.7\t5\n47.8\t7\n47.9\t7\n48.1\t3\n48.2\t7\n48.3\t3\n48.4\t4\n48.5\t3\n48.6\t1\n48.7\t3\n48.8\t2\n48.9\t14\n49.2\t2\n49.3\t8\n49.4\t10\n49.5\t4\n49.6\t5\n49.7\t5\n49.8\t3\n50.1\t4\n50.2\t2\n50.3\t3\n50.4\t5\n50.5\t1\n50.6\t1\n50.7\t3\n50.8\t1\n51.1\t1\n51.2\t2\n51.3\t4\n51.5\t4\n51.6\t7\n51.7\t4\n51.8\t5\n51.9\t5\n52.1\t2\n52.2\t1\n52.3\t8\n52.4\t6\n52.5\t3\n52.6\t4\n52.7\t4\n52.8\t3\n52.9\t3\n53.1\t7\n53.2\t1\n53.3\t8\n53.4\t4\n53.5\t10\n53.6\t2\n53.7\t4\n53.8\t6\n53.9\t6\n54.1\t11\n54.2\t1\n54.3\t6\n54.4\t7\n54.5\t7\n54.6\t5\n54.7\t11\n54.8\t6\n54.9\t3\n55.1\t4\n55.3\t5\n55.4\t7\n55.5\t2\n55.7\t1\n55.8\t1\n55.9\t1\n56.1\t4\n56.2\t3\n56.4\t4\n56.5\t5\n56.6\t4\n56.7\t8\n56.8\t6\n56.9\t9\n57.1\t4\n57.2\t7\n57.3\t5\n57.4\t7\n57.5\t4\n57.6\t5\n57.7\t4\n57.8\t3\n57.9\t3\n58.1\t7\n58.2\t7\n58.3\t6\n58.4\t6\n58.5\t7\n58.6\t3\n58.7\t1\n58.8\t6\n58.9\t3\n59.1\t5\n59.2\t6\n59.3\t6\n59.4\t4\n59.5\t1\n59.6\t4\n59.7\t1\n59.8\t6\n59.9\t4\n60.1\t7\n60.3\t1\n60.4\t6\n60.5\t7\n60.6\t3\n60.7\t2\n61.1\t1\n61.2\t4\n61.3\t6\n61.4\t5\n61.5\t2\n61.6\t5\n61.7\t5\n61.8\t5\n61.9\t8\n62.1\t2\n62.2\t7\n62.3\t13\n62.4\t7\n62.5\t8\n62.6\t9\n62.7\t10\n62.8\t2\n62.9\t4\n63.1\t5\n63.2\t3\n63.3\t3\n63.4\t4\n63.5\t7\n63.6\t5\n63.7\t6\n63.8\t3\n63.9\t7\n64.1\t6\n64.2\t5\n64.4\t5\n64.5\t9\n64.6\t7\n64.7\t7\n64.8\t3\n64.9\t5\n65.1\t5\n65.2\t9\n65.3\t7\n65.4\t10\n65.5\t5\n65.6\t3\n65.8\t1\n65.9\t1\n66.1\t1\n66.2\t3\n66.3\t8\n66.4\t4\n66.5\t2\n66.6\t1\n66.8\t3\n66.9\t7\n67.1\t1\n67.2\t5\n67.3\t1\n67.4\t2\n67.7\t4\n67.8\t9\n67.9\t4\n68.2\t1\n68.4\t4\n68.5\t8\n68.6\t5\n68.7\t2\n68.8\t1\n68.9\t1\n69.1\t1\n69.2\t6\n69.4\t1\n69.5\t3\n69.6\t2\n69.9\t1\n71.8\t1\n73.9\t7\n74.3\t7\n76.8\t2\n77.6\t1\n79.2\t1\n80.2\t1\n80.6\t1\n80.9\t1\n81.2\t1\n81.3\t1\n81.6\t1\n81.7\t1\n81.9\t1\n83.2\t1\n85.5\t2\n85.8\t3\n85.9\t1\n86.3\t1\n88.2\t5\n88.3\t4\n90.2\t1\n90.8\t1\n91.4\t9\n91.5\t10\n91.6\t13\n91.7\t17\n91.8\t13\n91.9\t11\n92.1\t16\n92.2\t9\n92.3\t16\n92.4\t17\n92.5\t11\n92.6\t11\n92.7\t17\n92.8\t13\n92.9\t19\n93.1\t19\n93.2\t18\n93.3\t14\n93.4\t7\n93.5\t14\n93.6\t19\n93.7\t12\n93.8\t15\n93.9\t19\n94.1\t20\n94.2\t21\n94.3\t27\n94.4\t20\n94.5\t21\n94.6\t26\n94.7\t24\n94.8\t15\n94.9\t7\n95.1\t1\n95.2\t9\n95.7\t3\n95.8\t1\n96.4\t1\n96.5\t5\n96.6\t7\n96.7\t4\n96.8\t6\n96.9\t5\n97.2\t2\n97.3\t9\n97.5\t4\n97.6\t4\n97.7\t7\n97.8\t5\n97.9\t7\n98.1\t3\n98.2\t1\n98.3\t2\n98.4\t1\n98.6\t1\n98.8\t3\n98.9\t9\n99.1\t7\n99.2\t9\n99.3\t7\n99.4\t9\n99.5\t7\n99.6\t6\n99.7\t10\n99.8\t8\n99.9\t11\n100.1\t9\n100.2\t8\n100.3\t2\n100.4\t1\n100.6\t1\n100.8\t2\n101.4\t1\n102.6\t3\n102.7\t2\n102.8\t4\n102.9\t3\n103.1\t6\n103.2\t5\n103.3\t2\n103.4\t8\n103.5\t7\n103.6\t9\n103.7\t11\n103.8\t2\n103.9\t7\n104.1\t9\n104.2\t7\n104.3\t8\n104.4\t10\n104.5\t9\n104.6\t5\n104.7\t5\n104.8\t6\n104.9\t3\n105.1\t37\n105.2\t28\n105.3\t10\n105.4\t7\n105.5\t6\n105.6\t31\n105.7\t36\n105.8\t23\n105.9\t32\n106.1\t57\n106.2\t80\n106.3\t50\n106.4\t58\n106.5\t68\n106.6\t43\n106.7\t38\n106.8\t49\n106.9\t53\n107.1\t47\n107.2\t55\n107.3\t69\n107.4\t64\n107.5\t44\n107.6\t54\n107.7\t70\n107.8\t64\n107.9\t36\n108.1\t64\n108.2\t57\n108.3\t68\n108.4\t65\n108.5\t69\n108.6\t70\n108.7\t71\n108.8\t87\n108.9\t73\n109.1\t53\n109.2\t61\n109.3\t37\n109.4\t46\n109.5\t54\n109.6\t63\n109.7\t53\n109.8\t50\n109.9\t37\n110.1\t61\n110.2\t35\n110.3\t52\n110.4\t69\n110.5\t47\n110.6\t39\n110.7\t40\n110.8\t51\n110.9\t48\n111.1\t30\n111.2\t52\n111.3\t34\n111.4\t44\n111.5\t46\n111.6\t42\n111.7\t34\n111.8\t37\n111.9\t55\n112.1\t49\n112.2\t34\n112.3\t33\n112.4\t48\n112.5\t23\n112.6\t40\n112.7\t56\n112.8\t29\n112.9\t33\n113.1\t34\n113.2\t42\n113.3\t34\n113.4\t54\n113.5\t38\n113.6\t47\n113.7\t35\n113.8\t48\n113.9\t50\n114.1\t31\n114.2\t36\n114.3\t51\n114.4\t56\n114.5\t64\n114.6\t47\n114.7\t35\n114.8\t54\n114.9\t64\n115.1\t40\n115.2\t42\n115.3\t48\n115.4\t54\n115.5\t15\n115.6\t41\n115.7\t51\n115.8\t51\n115.9\t61\n116.1\t58\n116.2\t42\n116.3\t67\n116.4\t69\n116.5\t48\n116.6\t52\n116.7\t41\n116.8\t35\n116.9\t21\n117.1\t16\n117.2\t26\n117.3\t27\n117.4\t26\n117.5\t32\n117.6\t23\n117.7\t33\n117.8\t41\n117.9\t33\n118.1\t41\n118.2\t31\n118.3\t26\n118.4\t53\n118.5\t53\n118.6\t26\n118.7\t19\n118.8\t22\n118.9\t23\n119.1\t40\n119.2\t42\n119.3\t48\n119.4\t16\n119.5\t30\n119.6\t21\n119.7\t18\n119.8\t19\n119.9\t39\n120.1\t52\n120.2\t45\n120.3\t38\n120.4\t45\n120.5\t31\n120.6\t27\n120.7\t18\n120.8\t16\n120.9\t62\n121.1\t55\n121.2\t60\n121.3\t81\n121.4\t54\n121.5\t69\n121.6\t55\n121.7\t61\n121.8\t71\n121.9\t88\n122.1\t88\n122.2\t61\n122.3\t55\n122.4\t64\n122.5\t59\n122.6\t57\n122.7\t55\n122.8\t51\n122.9\t51\n123.1\t48\n123.2\t35\n123.3\t32\n123.4\t36\n123.5\t7\n123.6\t20\n123.7\t7\n123.8\t5\n123.9\t12\n124.1\t1\n124.2\t2\n124.4\t1\n124.6\t5\n124.7\t1\n124.8\t2\n125.1\t1\n125.3\t1\n125.4\t1\n125.6\t8\n125.7\t1\n126.1\t1\n127.1\t2\n127.3\t7\n127.4\t1\n127.5\t4\n127.6\t2\n127.7\t3\n127.9\t4\n128.1\t26\n128.2\t15\n128.3\t14\n128.4\t18\n128.5\t16\n128.6\t16\n128.7\t28\n128.8\t15\n128.9\t21\n129.1\t14\n129.2\t20\n129.3\t21\n129.4\t14\n129.5\t22\n129.6\t21\n129.7\t13\n129.8\t23\n129.9\t15\n130.1\t15\n130.2\t23\n130.3\t15\n130.4\t9\n130.5\t17\n130.6\t10\n130.7\t15\n130.8\t16\n130.9\t9\n131.1\t9\n131.2\t12\n131.3\t9\n131.4\t12\n131.5\t14\n131.6\t15\n131.7\t13\n131.8\t16\n131.9\t16\n132.1\t7\n132.2\t8\n132.3\t13\n132.4\t8\n132.5\t24\n132.6\t9\n132.7\t9\n132.8\t14\n132.9\t8\n133.1\t32\n133.2\t14\n133.3\t21\n133.4\t16\n133.5\t16\n133.6\t9\n133.7\t10\n133.8\t12\n133.9\t12\n134.1\t26\n134.2\t17\n134.3\t20\n134.4\t16\n134.5\t15\n134.6\t23\n134.7\t11\n134.8\t17\n134.9\t18\n135.1\t5\n135.2\t14\n135.3\t16\n135.4\t16\n135.5\t4\n135.7\t1\n135.8\t8\n135.9\t3\n136.7\t3\n136.8\t7\n137.1\t9\n137.2\t13\n137.3\t4\n137.5\t2\n138.1\t8\n138.3\t1\n138.8\t1\n139.4\t3\n139.8\t2\n140.1\t13\n140.2\t2\n140.3\t3\n140.5\t1\n140.6\t2\n140.7\t2\n140.9\t1\n141.3\t4\n142.1\t3\n142.5\t6\n142.6\t3\n142.7\t6\n142.8\t1\n143.1\t1\n143.2\t3\n143.5\t1\n143.8\t2\n144.1\t1\n144.2\t3\n144.6\t2\n145.6\t2\n146.1\t4\n146.6\t13\n146.7\t24\n146.8\t25\n146.9\t22\n147.1\t21\n147.2\t22\n147.3\t20\n147.4\t18\n147.5\t27\n147.6\t19\n147.7\t25\n147.8\t25\n147.9\t19\n148.1\t16\n148.2\t16\n148.3\t16\n148.4\t19\n148.5\t23\n148.6\t30\n148.7\t29\n148.8\t26\n148.9\t23\n149.1\t21\n149.2\t21\n149.3\t22\n149.4\t20\n149.5\t8\n149.6\t13\n149.7\t10\n149.8\t7\n149.9\t18\n150.1\t14\n150.2\t16\n150.3\t21\n150.4\t15\n150.5\t10\n150.6\t22\n150.7\t14\n150.8\t17\n150.9\t16\n151.1\t20\n151.2\t25\n151.3\t13\n151.4\t20\n151.5\t12\n151.6\t21\n151.7\t19\n151.8\t15\n151.9\t15\n152.1\t30\n152.2\t28\n152.3\t18\n152.4\t23\n152.5\t14\n152.6\t16\n152.7\t24\n152.8\t16\n152.9\t18\n153.1\t19\n153.2\t17\n153.3\t15\n153.4\t22\n153.5\t17\n153.6\t19\n153.7\t21\n153.8\t13\n153.9\t16\n154.1\t17\n154.2\t17\n154.3\t12\n154.4\t14\n154.5\t17\n154.6\t11\n154.7\t17\n154.8\t29\n154.9\t10\n155.1\t8\n155.2\t17\n155.3\t22\n155.4\t22\n155.5\t14\n155.6\t8\n155.7\t10\n155.8\t6\n155.9\t1\n156.4\t2\n157.8\t3\n157.9\t3\n158.5\t2\n158.6\t3\n158.9\t4\n159.1\t1\n159.2\t5\n159.3\t12\n159.4\t7\n159.5\t6\n159.6\t6\n159.7\t4\n159.8\t5\n159.9\t9\n160.1\t8\n160.2\t3\n160.3\t2\n160.5\t1\n160.6\t8\n160.7\t1\n160.8\t1\n160.9\t1\n161.9\t35\n162.3\t3\n162.5\t5\n162.8\t3\n162.9\t8\n163.7\t1\n164.3\t8\n165.1\t5\n165.8\t1\n165.9\t1\n166.6\t1\n167.1\t6\n167.2\t6\n167.3\t16\n167.4\t22\n167.5\t15\n167.6\t15\n167.7\t19\n167.8\t27\n167.9\t23\n168.1\t18\n168.2\t19\n168.3\t13\n168.4\t5\n168.5\t11\n168.6\t25\n168.7\t24\n168.8\t26\n168.9\t19\n169.1\t19\n169.2\t16\n169.3\t13\n169.4\t29\n169.5\t23\n169.6\t20\n169.7\t25\n169.8\t24\n169.9\t24\n170.1\t13\n170.2\t19\n170.3\t26\n170.4\t21\n170.5\t15\n170.6\t26\n170.7\t33\n170.8\t26\n170.9\t19\n171.1\t29\n171.2\t26\n171.3\t21\n171.4\t27\n171.5\t34\n171.6\t25\n171.7\t21\n171.8\t23\n171.9\t23\n172.1\t17\n172.2\t16\n172.3\t33\n172.4\t23\n172.5\t20\n172.6\t28\n172.7\t26\n172.8\t26\n172.9\t20\n173.1\t22\n173.2\t26\n173.3\t28\n173.4\t18\n173.5\t14\n173.6\t21\n173.7\t20\n173.8\t23\n173.9\t14\n174.1\t21\n174.2\t20\n174.3\t21\n174.4\t14\n174.5\t13\n174.6\t11\n174.7\t10\n174.8\t11\n174.9\t7\n175.1\t11\n175.2\t6\n175.3\t19\n175.4\t24\n175.5\t8\n175.6\t5\n175.7\t1\n176.1\t2\n176.8\t1\n177.1\t1\n177.6\t2\n177.8\t1\n177.9\t1\n178.1\t23\n178.6\t1\n180.2\t1\n180.7\t1\n181.8\t1\n182.7\t3\n182.8\t4\n183.7\t19\n183.8\t2\n184.5\t5\n184.8\t1\n184.9\t16\n185.1\t30\n185.2\t20\n185.3\t23\n185.4\t15\n185.5\t17\n185.6\t14\n185.7\t14\n185.8\t17\n185.9\t15\n186.1\t18\n186.2\t13\n186.3\t17\n186.4\t11\n186.5\t18\n186.6\t13\n186.7\t16\n186.8\t19\n186.9\t19\n187.1\t29\n187.2\t20\n187.3\t27\n187.4\t26\n187.5\t24\n187.6\t18\n187.7\t19\n187.8\t15\n187.9\t20\n188.1\t14\n188.2\t23\n188.3\t24\n188.4\t21\n188.5\t26\n188.6\t25\n188.7\t13\n188.8\t17\n188.9\t28\n189.1\t33\n189.2\t30\n189.3\t29\n189.4\t18\n189.5\t27\n189.6\t28\n189.7\t31\n189.8\t32\n189.9\t29\n190.1\t24\n190.2\t28\n190.3\t38\n190.4\t33\n190.5\t23\n190.6\t22\n190.7\t22\n190.8\t36\n190.9\t26\n191.1\t36\n191.2\t22\n191.3\t15\n191.4\t26\n191.5\t32\n191.6\t25\n191.7\t31\n191.8\t22\n191.9\t23\n192.1\t7\n192.2\t6\n192.3\t2\n192.4\t4\n192.5\t2\n192.6\t2\n192.7\t3\n192.9\t1\n193.5\t3\n193.7\t3\n193.8\t1\n193.9\t1\n194.1\t27\n194.2\t44\n194.3\t22\n194.4\t2\n194.5\t4\n194.7\t13\n194.8\t29\n194.9\t30\n195.1\t28\n195.2\t25\n195.3\t30\n195.4\t30\n195.5\t25\n195.6\t26\n195.7\t19\n195.8\t30\n195.9\t17\n196.1\t12\n196.2\t7\n196.3\t17\n196.4\t11\n196.5\t2\n196.6\t6\n196.7\t7\n196.8\t3\n196.9\t7\n197.1\t3\n197.2\t3\n197.4\t9\n197.5\t20\n197.6\t14\n197.7\t19\n197.8\t22\n197.9\t19\n198.1\t12\n198.2\t17\n198.3\t6\n198.4\t5\n198.5\t1\n198.6\t3\n198.7\t6\n198.8\t1\n198.9\t2\n199.5\t5\n200.1\t11\n200.2\t27\n200.3\t33\n200.4\t5\n201.2\t1\n201.3\t16\n201.4\t15\n201.5\t11\n201.6\t6\n201.7\t12\n201.8\t16\n201.9\t18\n202.1\t21\n202.2\t13\n202.3\t17\n202.4\t16\n202.5\t18\n202.6\t19\n202.7\t21\n202.8\t22\n202.9\t17\n203.1\t16\n203.2\t20\n203.3\t14\n203.4\t3\n203.5\t1\n203.6\t6\n203.7\t20\n203.8\t18\n203.9\t9\n204.1\t48\n204.2\t14\n204.3\t21\n204.4\t19\n204.5\t16\n204.6\t27\n204.7\t24\n204.8\t18\n204.9\t16\n205.1\t30\n205.2\t24\n205.3\t25\n205.4\t9\n205.5\t16\n205.6\t18\n205.7\t12\n205.8\t23\n205.9\t28\n206.1\t17\n206.2\t15\n206.3\t16\n206.4\t26\n206.5\t19\n206.6\t14\n206.7\t15\n206.8\t19\n206.9\t30\n207.1\t10\n207.2\t23\n207.3\t17\n207.4\t17\n207.5\t16\n207.6\t21\n207.7\t16\n207.8\t21\n207.9\t25\n208.1\t19\n208.2\t12\n208.3\t17\n208.4\t11\n208.5\t12\n208.6\t10\n208.7\t7\n208.8\t7\n208.9\t7\n209.1\t9\n209.2\t8\n209.3\t6\n209.4\t12\n209.5\t17\n209.6\t21\n209.7\t15\n209.8\t23\n209.9\t14\n210.1\t16\n210.2\t21\n210.3\t14\n210.4\t20\n210.5\t28\n210.6\t31\n210.7\t18\n210.8\t24\n210.9\t16\n211.1\t15\n211.2\t23\n211.3\t20\n211.4\t11\n211.5\t21\n211.6\t20\n211.7\t30\n211.8\t34\n211.9\t22\n212.1\t33\n212.2\t20\n212.3\t37\n212.4\t28\n212.5\t26\n212.6\t29\n212.7\t25\n212.8\t23\n212.9\t13\n213.1\t26\n213.2\t33\n213.3\t24\n213.4\t35\n213.5\t26\n213.6\t32\n213.7\t24\n213.8\t35\n213.9\t27\n214.1\t14\n214.2\t15\n214.3\t9\n214.4\t4\n214.5\t1\n214.6\t2\n214.7\t7\n214.8\t2\n214.9\t1\n215.6\t1\n215.9\t4\n216.6\t5\n216.7\t1\n216.8\t1\n217.3\t5\n217.4\t6\n217.7\t3\n218.2\t1\n218.4\t1\n218.6\t6\n218.7\t4\n218.8\t2\n218.9\t12\n219.1\t8\n219.2\t5\n219.3\t10\n219.4\t11\n219.5\t7\n219.6\t9\n219.7\t3\n219.8\t7\n219.9\t6\n220.1\t4\n220.2\t2\n220.3\t10\n220.4\t9\n220.5\t10\n220.6\t6\n220.7\t11\n220.8\t12\n220.9\t7\n221.1\t7\n221.2\t12\n221.3\t17\n221.4\t23\n221.5\t18\n221.6\t11\n221.7\t11\n221.8\t12\n221.9\t17\n222.1\t8\n222.2\t9\n222.3\t9\n222.4\t8\n222.5\t2\n222.6\t13\n222.7\t9\n222.8\t10\n222.9\t15\n223.1\t27\n223.2\t16\n223.3\t25\n223.4\t9\n223.5\t8\n223.6\t10\n223.7\t14\n223.8\t18\n223.9\t19\n224.1\t16\n224.2\t25\n224.3\t24\n224.4\t23\n224.5\t21\n224.6\t18\n224.7\t17\n224.8\t22\n224.9\t19\n225.1\t21\n225.2\t32\n225.3\t35\n225.4\t20\n225.5\t27\n225.6\t26\n225.7\t23\n225.8\t21\n225.9\t27\n226.1\t22\n226.2\t19\n226.3\t9\n226.4\t30\n226.5\t32\n226.6\t21\n226.7\t21\n226.8\t28\n226.9\t12\n227.1\t14\n227.2\t19\n227.3\t21\n227.4\t19\n227.5\t22\n227.6\t13\n227.7\t13\n227.8\t20\n227.9\t17\n228.1\t19\n228.2\t17\n228.3\t15\n228.4\t8\n228.5\t2\n228.6\t2\n228.7\t1\n228.8\t8\n228.9\t1\n229.2\t1\n229.6\t1\n230.1\t4\n231.5\t2\n231.9\t2\n232.1\t9\n232.2\t5\n232.3\t4\n232.4\t11\n232.5\t5\n232.6\t5\n232.7\t4\n232.8\t7\n232.9\t1\n233.2\t3\n234.2\t1\n234.6\t2\n235.1\t5\n235.2\t30\n235.3\t29\n235.4\t14\n235.5\t18\n235.6\t17\n235.7\t21\n235.8\t24\n235.9\t22\n236.1\t25\n236.2\t11\n236.3\t19\n236.4\t21\n236.5\t23\n236.6\t24\n236.7\t19\n236.8\t23\n236.9\t15\n237.1\t21\n237.2\t30\n237.3\t26\n237.4\t23\n237.5\t28\n237.6\t24\n237.7\t24\n237.8\t11\n237.9\t2\n238.2\t6\n238.3\t1\n238.4\t2\n238.5\t4\n238.6\t4\n238.7\t4\n238.8\t4\n238.9\t2\n239.1\t4\n239.2\t3\n239.5\t2\n239.7\t1\n239.8\t1\n240.4\t6\n240.5\t20\n240.6\t17\n240.7\t20\n240.8\t21\n240.9\t13\n241.1\t22\n241.2\t17\n241.3\t14\n241.4\t13\n241.5\t20\n241.6\t28\n241.7\t22\n241.8\t27\n241.9\t25\n242.1\t19\n242.2\t34\n242.3\t27\n242.4\t24\n242.5\t17\n242.6\t22\n242.7\t23\n242.8\t5\n242.9\t7\n243.1\t9\n243.2\t2\n243.3\t10\n243.4\t8\n243.5\t7\n243.6\t5\n243.7\t7\n243.8\t7\n243.9\t7\n244.1\t5\n244.2\t3\n244.3\t3\n244.4\t6\n244.5\t13\n244.6\t13\n244.7\t14\n244.8\t13\n244.9\t17\n245.1\t16\n245.2\t19\n245.3\t23\n245.4\t35\n245.5\t26\n245.6\t25\n245.7\t22\n245.8\t28\n245.9\t24\n246.1\t16\n246.2\t29\n246.3\t23\n246.4\t31\n246.5\t30\n246.6\t35\n246.7\t16\n246.8\t24\n246.9\t30\n247.1\t22\n247.2\t32\n247.3\t21\n247.4\t15\n247.5\t15\n247.6\t16\n247.7\t14\n247.8\t9\n247.9\t6\n248.1\t1\n248.2\t1\n248.5\t9\n248.6\t4\n248.9\t6\n249.2\t2\n249.4\t4\n249.5\t27\n249.6\t21\n249.7\t19\n249.8\t22\n249.9\t22\n250.1\t24\n250.2\t24\n250.3\t26\n250.4\t15\n250.5\t23\n250.6\t12\n250.7\t22\n250.8\t21\n250.9\t38\n251.1\t23\n251.2\t32\n251.3\t38\n251.4\t36\n251.5\t25\n251.6\t36\n251.7\t30\n251.8\t27\n251.9\t27\n252.1\t20\n252.2\t17\n252.3\t15\n252.4\t11\n252.5\t34\n252.6\t25\n252.7\t25\n252.8\t27\n252.9\t31\n253.1\t26\n253.2\t42\n253.3\t29\n253.4\t17\n253.5\t15\n253.6\t7\n253.7\t6\n253.8\t8\n253.9\t5\n254.1\t12\n254.2\t1\n254.5\t1\n254.7\t1\n254.8\t4\n254.9\t2\n255.2\t1\n256.8\t1\n256.9\t5\n257.7\t1\n257.9\t4\n258.1\t3\n258.2\t2\n258.3\t4\n258.4\t4\n258.5\t3\n258.6\t1\n258.7\t6\n258.8\t1\n258.9\t2\n259.1\t3\n259.2\t5\n259.3\t2\n259.4\t3\n259.5\t3\n259.6\t2\n259.7\t4\n259.8\t4\n259.9\t4\n260.1\t2\n260.2\t10\n260.3\t4\n260.4\t4\n260.5\t5\n260.6\t3\n260.7\t4\n260.8\t1\n260.9\t2\n261.1\t5\n261.2\t6\n261.3\t7\n261.4\t6\n261.6\t12\n261.7\t10\n261.8\t8\n261.9\t12\n262.1\t6\n262.2\t12\n262.3\t12\n262.4\t10\n262.5\t7\n262.6\t8\n262.7\t4\n262.8\t7\n262.9\t3\n263.1\t7\n263.2\t3\n263.3\t7\n263.4\t13\n263.5\t13\n263.6\t13\n263.7\t16\n263.8\t16\n263.9\t11\n264.1\t20\n264.2\t19\n264.3\t16\n264.4\t22\n264.5\t14\n264.6\t12\n264.7\t20\n264.8\t26\n264.9\t36\n265.1\t26\n265.2\t27\n265.3\t21\n265.4\t14\n265.5\t34\n265.6\t29\n265.7\t34\n265.8\t13\n265.9\t21\n266.1\t24\n266.2\t30\n266.3\t21\n266.4\t29\n266.5\t19\n266.6\t22\n266.7\t24\n266.8\t22\n266.9\t15\n267.1\t17\n267.2\t16\n267.3\t6\n267.4\t3\n267.5\t6\n267.7\t1\n267.8\t1\n268.1\t3\n269.5\t1\n270.5\t4\n270.7\t4\n270.8\t7\n271.1\t1\n271.3\t1\n271.7\t1\n271.8\t1\n272.2\t12\n272.5\t2\n273.4\t2\n273.5\t1\n273.6\t2\n273.8\t2\n273.9\t1\n274.1\t4\n274.5\t1\n274.8\t1\n276.3\t1\n278.2\t6\n278.5\t1\n279.6\t2\n280.5\t1\n280.8\t1\n281.1\t1\n282.4\t1\n282.6\t1\n282.8\t3\n282.9\t8\n283.1\t28\n283.2\t23\n283.3\t23\n283.4\t21\n283.5\t27\n283.6\t31\n283.7\t21\n283.8\t23\n283.9\t29\n284.1\t25\n284.2\t27\n284.3\t28\n284.4\t25\n284.5\t12\n284.6\t36\n284.7\t36\n284.8\t20\n284.9\t31\n285.1\t27\n285.2\t13\n285.3\t22\n285.4\t7\n285.5\t19\n285.6\t25\n285.7\t24\n285.8\t22\n285.9\t28\n286.1\t15\n286.2\t26\n286.3\t15\n286.4\t25\n286.5\t26\n286.6\t20\n286.7\t22\n286.8\t27\n286.9\t24\n287.1\t42\n287.2\t28\n287.3\t19\n287.4\t24\n287.5\t25\n287.6\t16\n287.7\t16\n287.8\t30\n287.9\t20\n288.1\t15\n288.2\t23\n288.3\t30\n288.4\t29\n288.5\t30\n288.6\t25\n288.7\t29\n288.8\t21\n288.9\t21\n289.1\t7\n289.2\t23\n289.3\t20\n289.4\t14\n289.5\t9\n289.6\t10\n289.7\t7\n289.8\t4\n289.9\t1\n292.3\t5\n292.4\t3\n292.5\t6\n292.6\t7\n292.7\t5\n292.8\t6\n292.9\t1\n293.1\t5\n293.2\t4\n293.3\t7\n293.4\t4\n293.5\t2\n293.7\t1\n293.9\t1\n294.5\t13\n294.6\t26\n294.7\t19\n294.8\t21\n294.9\t22\n295.1\t25\n295.2\t24\n295.3\t14\n295.4\t23\n295.5\t8\n295.6\t17\n295.7\t11\n295.8\t15\n295.9\t6\n296.1\t9\n296.2\t10\n296.3\t11\n296.4\t12\n296.5\t10\n296.6\t1\n296.7\t2\n296.9\t3\n297.2\t1\n297.8\t3\n297.9\t3\n298.1\t1\n298.9\t1\n299.7\t1\n300.8\t20\n300.9\t21\n301.1\t33\n301.2\t28\n301.3\t13\n301.4\t26\n301.5\t16\n301.6\t32\n301.7\t28\n301.8\t30\n301.9\t30\n302.1\t20\n302.2\t11\n302.3\t26\n302.4\t33\n302.5\t33\n302.6\t27\n302.7\t30\n302.8\t15\n302.9\t25\n303.1\t25\n303.2\t24\n303.3\t25\n303.4\t7\n303.5\t26\n303.6\t23\n303.7\t23\n303.8\t26\n303.9\t19\n304.1\t25\n304.2\t17\n304.3\t28\n304.4\t12\n304.5\t30\n304.6\t24\n304.7\t24\n304.8\t25\n304.9\t26\n305.1\t20\n305.2\t28\n305.3\t29\n305.4\t26\n305.5\t32\n305.6\t34\n305.7\t25\n305.8\t24\n305.9\t29\n306.1\t21\n306.2\t28\n306.3\t27\n306.4\t33\n306.5\t27\n306.6\t23\n306.7\t12\n306.8\t11\n306.9\t20\n307.1\t24\n307.2\t23\n307.3\t21\n307.4\t31\n307.5\t43\n307.6\t32\n307.7\t22\n307.8\t22\n307.9\t26\n308.1\t22\n308.2\t16\n308.3\t12\n308.4\t23\n308.5\t19\n308.6\t14\n308.7\t14\n308.8\t10\n308.9\t5\n309.1\t4\n309.2\t7\n309.3\t4\n309.4\t2\n309.5\t6\n309.6\t1\n309.7\t5\n309.8\t5\n309.9\t1\n310.2\t6\n310.3\t2\n310.4\t2\n310.5\t2\n310.6\t2\n311.3\t1\n311.7\t1\n311.9\t1\n312.1\t1\n312.7\t1\n312.8\t2\n312.9\t3\n313.1\t9\n313.2\t15\n313.3\t6\n313.4\t8\n313.5\t11\n313.6\t9\n313.7\t4\n313.8\t3\n313.9\t6\n314.1\t3\n314.2\t2\n314.3\t5\n314.4\t8\n314.5\t8\n314.6\t6\n314.7\t8\n314.8\t9\n314.9\t6\n315.1\t8\n315.2\t8\n315.3\t5\n315.4\t3\n315.5\t10\n315.6\t5\n315.7\t6\n315.8\t7\n315.9\t7\n316.1\t13\n316.2\t5\n316.3\t2\n316.4\t3\n316.6\t1\n316.8\t1\n316.9\t2\n317.3\t3\n317.4\t2\n317.7\t5\n318.4\t1\n318.5\t13\n318.6\t15\n318.7\t28\n318.8\t23\n318.9\t23\n319.1\t38\n319.2\t26\n319.3\t19\n319.4\t33\n319.5\t27\n319.6\t35\n319.7\t38\n319.8\t22\n319.9\t18\n320.1\t32\n320.2\t27\n320.3\t34\n320.4\t32\n320.5\t24\n320.6\t20\n320.7\t28\n320.8\t26\n320.9\t28\n321.1\t19\n321.2\t38\n321.3\t20\n321.4\t13\n321.5\t16\n321.6\t23\n321.7\t26\n321.8\t24\n321.9\t19\n322.1\t17\n322.2\t21\n322.3\t21\n322.4\t26\n322.5\t28\n322.6\t17\n322.7\t21\n322.8\t29\n322.9\t25\n323.1\t24\n323.2\t23\n323.3\t29\n323.4\t24\n323.5\t26\n323.6\t26\n323.7\t23\n323.8\t23\n323.9\t28\n324.1\t27\n324.2\t13\n324.3\t7\n324.4\t20\n324.5\t27\n324.6\t24\n324.7\t22\n324.8\t22\n324.9\t14\n325.1\t5\n325.2\t20\n325.3\t18\n325.4\t23\n325.5\t27\n325.6\t25\n325.7\t21\n325.8\t18\n325.9\t11\n326.1\t9\n326.2\t4\n326.3\t2\n326.4\t3\n326.5\t12\n326.6\t6\n326.7\t10\n326.8\t16\n326.9\t25\n327.1\t5\n327.2\t6\n327.3\t19\n327.4\t21\n327.5\t11\n327.6\t17\n327.7\t15\n327.8\t11\n327.9\t12\n328.4\t7\n328.5\t9\n328.6\t13\n328.7\t8\n328.8\t16\n328.9\t17\n329.1\t14\n329.2\t17\n329.3\t9\n329.4\t7\n329.5\t14\n329.6\t14\n329.7\t14\n329.8\t8\n329.9\t3\n330.1\t15\n330.2\t15\n330.3\t6\n330.4\t5\n330.5\t10\n330.6\t18\n330.7\t8\n330.8\t4\n330.9\t6\n331.1\t23\n331.2\t22\n331.3\t15\n331.4\t10\n331.5\t25\n331.6\t15\n331.7\t21\n331.8\t15\n331.9\t19\n332.1\t16\n332.2\t8\n332.3\t13\n332.4\t14\n332.5\t13\n332.6\t10\n332.7\t8\n332.8\t10\n332.9\t19\n333.1\t18\n333.2\t19\n333.3\t14\n333.4\t14\n333.5\t19\n333.6\t13\n333.7\t16\n333.8\t9\n333.9\t7\n334.1\t9\n334.2\t8\n334.3\t12\n334.4\t13\n334.5\t15\n334.6\t17\n334.7\t14\n334.8\t31\n334.9\t16\n335.1\t5\n335.2\t8\n335.3\t12\n335.4\t5\n335.5\t16\n335.6\t12\n335.7\t24\n335.8\t14\n335.9\t22\n336.1\t17\n336.2\t18\n336.3\t5\n336.4\t23\n336.5\t16\n336.6\t16\n336.7\t20\n336.8\t18\n336.9\t31\n337.1\t27\n337.2\t23\n337.3\t19\n337.4\t8\n337.5\t27\n337.6\t22\n337.7\t21\n337.8\t35\n337.9\t21\n338.1\t12\n338.2\t23\n338.3\t27\n338.4\t21\n338.5\t23\n338.6\t15\n338.7\t15\n338.8\t13\n338.9\t16\n339.1\t16\n339.2\t25\n339.3\t16\n339.4\t25\n339.5\t14\n339.6\t15\n339.7\t14\n339.8\t20\n339.9\t20\n340.1\t23\n340.2\t14\n340.3\t16\n340.4\t17\n340.5\t15\n340.6\t17\n340.7\t15\n340.8\t14\n340.9\t11\n341.1\t10\n341.2\t9\n341.3\t23\n341.4\t19\n341.5\t13\n341.6\t20\n341.7\t17\n341.8\t19\n341.9\t11\n342.1\t8\n342.2\t14\n342.3\t16\n342.4\t5\n342.5\t10\n342.6\t12\n342.7\t7\n342.8\t6\n342.9\t7\n343.1\t14\n343.2\t13\n343.3\t19\n343.4\t9\n343.5\t18\n343.6\t22\n343.7\t21\n343.8\t5\n343.9\t23\n344.1\t11\n344.2\t17\n344.3\t14\n344.4\t15\n344.5\t20\n344.6\t30\n344.7\t11\n344.8\t18\n344.9\t30\n345.1\t31\n345.2\t31\n345.3\t23\n345.4\t15\n345.5\t26\n345.6\t30\n345.7\t30\n345.8\t31\n345.9\t17\n346.1\t18\n346.2\t31\n346.3\t24\n346.4\t20\n346.5\t16\n346.6\t19\n346.7\t22\n346.8\t20\n346.9\t13\n347.1\t22\n347.2\t25\n347.3\t19\n347.4\t17\n347.5\t24\n347.6\t21\n347.7\t15\n347.8\t24\n347.9\t17\n348.1\t26\n348.2\t26\n348.3\t25\n348.4\t17\n348.5\t18\n348.6\t13\n348.7\t18\n348.8\t17\n348.9\t11\n349.1\t4\n349.2\t9\n349.3\t10\n349.4\t9\n349.5\t9\n349.6\t6\n349.7\t5\n349.8\t3\n349.9\t4\n350.1\t3\n350.3\t1\n350.4\t4\n350.5\t25\n350.6\t26\n350.7\t21\n350.8\t27\n350.9\t24\n351.1\t22\n351.2\t24\n351.3\t5\n351.4\t8\n351.5\t21\n351.6\t31\n351.7\t14\n351.8\t24\n351.9\t24\n352.1\t30\n352.2\t56\n352.3\t24\n352.4\t25\n352.5\t14\n352.6\t21\n352.7\t26\n352.8\t26\n352.9\t8\n353.1\t13\n353.2\t16\n353.3\t20\n353.4\t14\n353.6\t6\n353.7\t10\n353.8\t20\n353.9\t18\n354.1\t15\n354.2\t17\n354.3\t20\n354.4\t25\n354.5\t22\n354.6\t20\n354.7\t14\n354.8\t14\n354.9\t17\n355.1\t17\n355.2\t11\n355.3\t11\n355.4\t11\n355.5\t18\n355.6\t16\n355.7\t22\n355.8\t18\n355.9\t14\n356.1\t14\n356.2\t19\n356.3\t24\n356.4\t23\n356.5\t13\n356.6\t8\n356.7\t13\n356.8\t11\n356.9\t30\n357.1\t15\n357.2\t14\n357.3\t17\n357.4\t13\n357.5\t22\n357.6\t10\n357.7\t21\n357.8\t27\n357.9\t23\n358.1\t34\n358.2\t22\n358.3\t10\n358.4\t23\n358.5\t27\n358.6\t23\n358.7\t29\n358.8\t33\n358.9\t20\n359.1\t23\n359.2\t18\n359.3\t27\n359.4\t25\n359.5\t22\n359.6\t23\n359.7\t14\n359.8\t31\n359.9\t41\n360.1\t33\n360.2\t26\n360.3\t22\n360.4\t23\n360.5\t28\n360.6\t35\n360.7\t30\n360.8\t45\n360.9\t16\n361.1\t35\n361.2\t31\n361.3\t21\n361.4\t15\n361.5\t21\n361.6\t13\n361.7\t25\n361.8\t21\n361.9\t23\n362.1\t9\n362.2\t25\n362.3\t9\n362.4\t8\n362.5\t27\n362.6\t16\n362.7\t7\n362.8\t15\n362.9\t19\n363.1\t20\n363.2\t21\n363.3\t20\n363.4\t28\n363.5\t23\n363.6\t35\n363.7\t22\n363.8\t13\n363.9\t15\n364.1\t20\n364.2\t14\n364.3\t11\n364.4\t20\n364.5\t17\n364.6\t13\n364.7\t25\n364.8\t18\n364.9\t16\n365.1\t23\n365.2\t23\n365.3\t12\n365.4\t15\n365.5\t3\n365.6\t6\n365.7\t8\n365.8\t14\n365.9\t15\n366.1\t1\n366.3\t1\n367.2\t2\n367.3\t1\n369.3\t1\n369.4\t11\n369.5\t14\n369.6\t12\n369.7\t9\n369.8\t3\n369.9\t10\n370.1\t20\n370.2\t16\n370.3\t22\n370.4\t12\n370.5\t21\n370.6\t27\n370.7\t15\n370.8\t19\n370.9\t12\n371.1\t17\n371.2\t14\n371.3\t15\n371.4\t21\n371.5\t23\n371.6\t17\n371.7\t19\n371.8\t16\n371.9\t16\n372.3\t5\n372.7\t1\n372.8\t2\n372.9\t15\n373.1\t15\n373.2\t10\n373.3\t11\n373.4\t15\n373.5\t10\n373.6\t2\n373.7\t14\n373.8\t21\n373.9\t25\n374.1\t20\n374.2\t22\n374.3\t24\n374.4\t17\n374.5\t27\n374.6\t15\n374.7\t21\n374.8\t25\n374.9\t18\n375.1\t12\n375.2\t25\n375.3\t24\n375.4\t15\n375.5\t19\n375.6\t16\n375.7\t19\n375.8\t7\n375.9\t5\n376.1\t17\n376.2\t15\n376.3\t13\n376.4\t22\n376.5\t9\n376.6\t9\n376.7\t19\n376.8\t19\n376.9\t31\n377.1\t12\n377.2\t20\n377.3\t24\n377.4\t28\n377.5\t23\n377.6\t33\n377.7\t25\n377.8\t28\n377.9\t33\n378.1\t25\n378.2\t34\n378.3\t30\n378.4\t23\n378.5\t21\n378.6\t28\n378.7\t26\n378.8\t29\n378.9\t9\n379.1\t25\n379.2\t19\n379.3\t15\n379.4\t19\n379.5\t27\n379.6\t25\n379.7\t20\n379.8\t11\n379.9\t2\n380.7\t1\n380.8\t1\n381.3\t12\n381.4\t25\n381.5\t13\n381.6\t22\n381.7\t17\n381.8\t19\n381.9\t13\n382.1\t13\n382.2\t18\n382.3\t19\n382.4\t35\n382.5\t25\n382.6\t17\n382.7\t18\n382.8\t21\n382.9\t11\n383.1\t19\n383.2\t10\n383.3\t11\n383.4\t17\n383.5\t21\n383.6\t18\n383.7\t11\n383.8\t6\n383.9\t11\n384.1\t11\n384.2\t10\n384.3\t15\n384.4\t16\n384.5\t13\n384.6\t15\n384.7\t19\n384.8\t9\n384.9\t19\n385.1\t11\n385.2\t10\n385.3\t16\n385.4\t14\n385.5\t21\n385.6\t14\n385.7\t32\n385.8\t26\n385.9\t25\n386.1\t13\n386.2\t24\n386.3\t26\n386.4\t24\n386.5\t19\n386.6\t26\n386.7\t21\n386.8\t18\n386.9\t20\n387.1\t26\n387.2\t16\n387.3\t21\n387.4\t16\n387.5\t22\n387.6\t18\n387.7\t22\n387.8\t12\n387.9\t23\n388.1\t15\n388.2\t14\n388.3\t10\n388.4\t14\n388.5\t16\n388.6\t19\n388.7\t12\n388.8\t6\n388.9\t11\n389.1\t11\n389.2\t12\n389.3\t17\n389.4\t12\n389.5\t13\n389.6\t8\n389.7\t10\n389.8\t15\n389.9\t20\n390.1\t6\n390.2\t16\n390.3\t14\n390.4\t11\n390.5\t10\n390.6\t9\n390.7\t15\n390.8\t13\n390.9\t16\n391.1\t18\n391.2\t22\n391.3\t14\n391.4\t17\n391.5\t28\n391.6\t26\n391.7\t10\n391.8\t27\n391.9\t29\n392.1\t23\n392.2\t30\n392.3\t22\n392.4\t23\n392.5\t23\n392.6\t18\n392.7\t18\n392.8\t23\n392.9\t24\n393.1\t30\n393.2\t33\n393.3\t35\n393.4\t20\n393.5\t29\n393.6\t31\n393.7\t35\n393.8\t31\n393.9\t28\n394.1\t35\n394.2\t18\n394.3\t16\n394.4\t28\n394.5\t20\n394.6\t13\n394.7\t18\n394.8\t24\n394.9\t5\n395.1\t22\n395.2\t23\n395.3\t15\n395.4\t19\n395.5\t14\n395.6\t10\n395.7\t6\n395.8\t7\n395.9\t2\n396.6\t1\n396.7\t7\n397.1\t14\n397.2\t17\n397.3\t21\n397.4\t35\n397.5\t21\n397.6\t23\n397.7\t12\n397.8\t18\n397.9\t18\n398.1\t23\n398.2\t20\n398.3\t30\n398.4\t18\n398.5\t15\n398.6\t18\n398.7\t23\n398.8\t19\n398.9\t20\n399.1\t25\n399.2\t19\n399.3\t13\n399.4\t13\n399.5\t18\n399.6\t10\n399.7\t16\n399.8\t13\n399.9\t16\n400.1\t20\n400.2\t15\n400.3\t15\n400.4\t24\n400.5\t17\n400.6\t12\n400.7\t15\n400.8\t13\n400.9\t16\n401.1\t18\n401.2\t12\n401.3\t16\n401.4\t9\n401.5\t15\n401.6\t19\n401.7\t10\n401.8\t12\n401.9\t13\n402.1\t25\n402.2\t22\n402.3\t16\n402.4\t17\n402.5\t18\n402.6\t17\n402.7\t16\n402.8\t15\n402.9\t18\n403.1\t14\n403.2\t12\n403.3\t6\n403.4\t8\n403.5\t7\n403.6\t13\n403.7\t12\n403.8\t17\n403.9\t13\n404.1\t17\n404.2\t14\n404.3\t21\n404.4\t17\n404.5\t13\n404.6\t12\n404.7\t13\n404.8\t8\n404.9\t12\n405.1\t11\n405.2\t12\n405.3\t25\n405.4\t7\n405.5\t24\n405.6\t25\n405.7\t26\n405.8\t23\n405.9\t20\n406.1\t24\n406.2\t26\n406.3\t22\n406.4\t27\n406.5\t22\n406.6\t22\n406.7\t9\n406.8\t23\n406.9\t25\n407.1\t32\n407.2\t29\n407.3\t24\n407.4\t15\n407.5\t2\n407.6\t3\n407.7\t3\n407.8\t3\n407.9\t2\n408.8\t1\n411.8\t1\n412.1\t4\n412.2\t2\n412.3\t3\n412.5\t1\n412.6\t5\n412.8\t6\n412.9\t3\n413.2\t1\n413.3\t2\n413.4\t1\n414.3\t8\n414.4\t22\n414.5\t28\n414.6\t26\n414.7\t21\n414.8\t28\n414.9\t13\n415.1\t17\n415.2\t39\n415.3\t26\n415.4\t23\n415.5\t21\n415.6\t27\n415.7\t25\n415.8\t21\n415.9\t12\n416.1\t28\n416.2\t15\n416.3\t23\n416.4\t9\n416.5\t3\n416.6\t2\n416.7\t2\n416.8\t11\n416.9\t7\n417.1\t16\n417.2\t20\n417.3\t24\n417.4\t13\n417.5\t23\n417.6\t30\n417.7\t28\n417.8\t15\n417.9\t27\n418.1\t26\n418.2\t26\n418.3\t24\n418.4\t30\n418.5\t22\n418.6\t19\n418.7\t26\n418.8\t24\n418.9\t25\n419.1\t20\n419.2\t32\n419.3\t29\n419.4\t18\n419.5\t28\n419.6\t33\n419.7\t25\n419.8\t24\n419.9\t39\n420.1\t22\n420.2\t29\n420.3\t25\n420.4\t21\n420.5\t26\n420.6\t33\n420.7\t24\n420.8\t37\n420.9\t19\n421.1\t27\n421.2\t32\n421.3\t30\n421.4\t31\n421.5\t21\n421.6\t26\n421.7\t3\n421.8\t5\n421.9\t12\n422.1\t26\n422.2\t30\n422.3\t29\n422.4\t27\n422.5\t19\n422.6\t32\n422.7\t29\n422.8\t28\n422.9\t30\n423.1\t11\n423.2\t11\n423.3\t17\n423.4\t11\n423.5\t16\n423.6\t18\n423.7\t23\n423.8\t10\n423.9\t11\n424.1\t22\n424.2\t12\n424.3\t12\n424.4\t23\n424.5\t17\n424.6\t24\n424.7\t15\n424.8\t15\n424.9\t18\n425.1\t14\n425.2\t19\n425.3\t13\n425.4\t12\n425.5\t15\n425.6\t26\n425.7\t14\n425.8\t21\n425.9\t18\n426.1\t26\n426.2\t12\n426.3\t14\n426.4\t18\n426.5\t15\n426.6\t15\n426.7\t9\n426.8\t10\n426.9\t11\n427.1\t10\n427.2\t5\n427.3\t9\n427.4\t5\n427.5\t15\n427.6\t18\n427.7\t17\n427.8\t9\n427.9\t13\n428.1\t16\n428.2\t11\n428.3\t13\n428.4\t12\n428.5\t13\n428.6\t15\n428.7\t13\n428.8\t11\n428.9\t10\n429.1\t1\n429.2\t4\n429.3\t1\n429.4\t4\n429.5\t1\n429.8\t2\n429.9\t3\n430.2\t2\n430.3\t3\n430.4\t2\n430.8\t1\n430.9\t1\n431.1\t4\n431.3\t1\n431.4\t1\n431.6\t1\n431.7\t1\n431.9\t1\n432.1\t3\n432.2\t3\n432.4\t8\n432.5\t12\n432.6\t9\n432.7\t12\n432.8\t17\n432.9\t23\n433.1\t18\n433.2\t14\n433.3\t18\n433.4\t13\n433.5\t19\n433.6\t21\n433.7\t15\n433.8\t21\n433.9\t30\n434.1\t13\n434.2\t17\n434.3\t28\n434.4\t34\n434.5\t25\n434.6\t28\n434.7\t30\n434.8\t20\n434.9\t15\n435.1\t22\n435.2\t32\n435.3\t33\n435.4\t23\n435.5\t29\n435.6\t30\n435.7\t32\n435.8\t31\n435.9\t26\n436.1\t28\n436.2\t14\n436.3\t29\n436.4\t24\n436.5\t33\n436.6\t33\n436.7\t41\n436.8\t21\n436.9\t32\n437.1\t39\n437.2\t30\n437.3\t35\n437.4\t24\n437.5\t25\n437.6\t31\n437.7\t30\n437.8\t37\n437.9\t25\n438.1\t1\n438.2\t1\n438.3\t4\n438.4\t4\n438.5\t1\n438.6\t2\n438.7\t2\n438.8\t1\n438.9\t1\n439.1\t6\n439.2\t3\n439.3\t6\n439.4\t4\n439.5\t4\n439.6\t1\n439.7\t7\n439.8\t5\n439.9\t4\n440.1\t7\n440.2\t8\n440.3\t6\n440.4\t2\n440.5\t2\n440.6\t9\n440.7\t3\n440.8\t4\n440.9\t7\n441.1\t4\n441.2\t4\n441.3\t2\n441.5\t4\n441.6\t8\n441.7\t8\n441.8\t3\n441.9\t4\n442.2\t3\n442.3\t1\n442.6\t2\n442.8\t3\n442.9\t1\n443.2\t1\n443.5\t3\n444.6\t1\n444.7\t2\n444.8\t2\n445.2\t9\n445.3\t19\n445.4\t27\n445.5\t22\n445.6\t29\n445.7\t20\n445.8\t30\n445.9\t15\n446.1\t16\n446.2\t27\n446.3\t27\n446.4\t22\n446.5\t16\n446.6\t27\n446.7\t10\n446.8\t16\n446.9\t26\n447.1\t23\n447.2\t23\n447.3\t23\n447.4\t26\n447.5\t25\n447.6\t25\n447.7\t25\n447.8\t24\n447.9\t26\n448.1\t18\n448.2\t14\n448.3\t24\n448.4\t21\n448.5\t20\n448.6\t23\n448.7\t23\n448.8\t16\n448.9\t27\n449.1\t12\n449.2\t20\n449.3\t26\n449.4\t23\n449.5\t25\n449.6\t26\n449.7\t30\n449.8\t33\n449.9\t20\n450.1\t25\n450.2\t21\n450.3\t31\n450.4\t34\n450.5\t32\n450.6\t24\n450.7\t21\n450.8\t27\n450.9\t30\n451.1\t35\n451.2\t29\n451.3\t38\n451.4\t30\n451.5\t34\n451.6\t40\n451.7\t29\n451.8\t18\n451.9\t29\n452.1\t13\n452.2\t18\n452.3\t14\n452.4\t22\n452.5\t25\n452.6\t24\n452.7\t20\n452.8\t18\n452.9\t26\n453.1\t25\n453.2\t7\n453.3\t25\n453.4\t18\n453.5\t10\n453.6\t27\n453.7\t16\n453.8\t18\n453.9\t24\n454.1\t24\n454.2\t16\n454.3\t17\n454.4\t19\n454.5\t17\n454.6\t16\n454.7\t23\n454.8\t14\n454.9\t14\n455.1\t12\n455.2\t6\n455.3\t6\n455.4\t9\n455.5\t6\n455.6\t7\n455.7\t6\n455.8\t7\n455.9\t9\n456.6\t1\n456.8\t1\n456.9\t1\n457.1\t1\n457.2\t1\n458.7\t1\n458.9\t1\n459.1\t1\n459.2\t1\n459.4\t3\n459.6\t2\n459.7\t1\n459.8\t1\n459.9\t1\n460.4\t3\n460.5\t3\n460.7\t2\n460.8\t3\n460.9\t5\n461.1\t5\n461.2\t5\n461.3\t6\n461.4\t1\n461.5\t5\n461.6\t3\n461.7\t9\n461.8\t3\n461.9\t3\n462.1\t1\n462.2\t2\n462.3\t1\n462.6\t2\n463.5\t1\n463.6\t2\n464.1\t1\n464.4\t1\n464.7\t2\n464.8\t1\n464.9\t2\n465.4\t2\n465.7\t1\n465.8\t5\n465.9\t7\n466.1\t2\n466.2\t6\n466.3\t5\n466.4\t4\n466.5\t6\n466.7\t5\n466.8\t1\n467.1\t4\n467.2\t2\n467.4\t1\n468.2\t1\n470.2\t1\n470.6\t1\n471.4\t1\n471.5\t2\n471.6\t3\n472.4\t2\n472.7\t1\n472.9\t2\n473.1\t1\n473.2\t2\n473.3\t5\n473.4\t1\n473.5\t1\n473.8\t2\n473.9\t2\n474.7\t1\n474.8\t1\n474.9\t8\n475.2\t1\n475.4\t21\n475.5\t27\n475.6\t29\n475.7\t23\n475.8\t32\n475.9\t35\n476.1\t32\n476.2\t25\n476.3\t34\n476.4\t37\n476.5\t34\n476.6\t30\n476.7\t10\n476.8\t35\n476.9\t22\n477.1\t33\n477.2\t28\n477.3\t39\n477.4\t21\n477.5\t22\n477.6\t12\n477.7\t4\n477.8\t4\n477.9\t5\n478.1\t1\n478.2\t2\n478.3\t2\n478.4\t7\n478.5\t3\n478.6\t3\n478.9\t4\n479.1\t2\n479.2\t8\n479.3\t6\n479.4\t4\n479.5\t4\n479.7\t2\n479.8\t1\n480.4\t3\n480.5\t4\n480.7\t1\n480.8\t1\n480.9\t2\n482.3\t1\n483.4\t2\n483.7\t4\n483.9\t1\n484.1\t3\n484.2\t4\n484.3\t2\n484.4\t7\n484.5\t1\n484.6\t4\n484.7\t5\n484.8\t3\n485.3\t3\n485.4\t8\n485.5\t3\n485.6\t1\n485.7\t6\n485.8\t5\n485.9\t2\n486.1\t4\n486.2\t1\n486.3\t1\n486.4\t1\n486.5\t9\n486.6\t4\n486.7\t2\n486.9\t5\n487.1\t1\n487.2\t4\n487.3\t2\n487.4\t1\n488.4\t1\n489.4\t1\n497.4\t1\n498.4\t1\n499.4\t1\n499.5\t1\n499.6\t1\n499.7\t1\n"
+      },
+      "dateCreated": "Mar 12, 2015 11:34:49 AM",
+      "dateStarted": "Mar 23, 2015 6:13:25 PM",
+      "dateFinished": "Mar 23, 2015 6:13:26 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1427104682044_1230857855",
+      "id": "20150323-175802_2120669034",
+      "dateCreated": "Mar 23, 2015 5:58:02 PM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "Cache Magic",
+  "id": "2AF7SPXXX",
+  "config": {
+    "looknfeel": "default"
+  },
+  "info": {}
+}

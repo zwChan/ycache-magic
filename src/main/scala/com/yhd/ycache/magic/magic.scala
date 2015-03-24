@@ -59,7 +59,7 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
   @transient private val sqlContext = new org.apache.spark.sql.SQLContext(sc)
   var tableRdd: RDD[Table] = null
 
-  def load() = {
+  def load(poolNameFilter: String = "all", filterOfKey: String = "all") = {
     val startTs = str2ts(startTime)
     val endTs = str2ts(endTime)
     tableRdd = sc.textFile(files, minPartition).flatMap(_.split("\n"))
@@ -137,7 +137,7 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
       } else {
         Table(0, "", "", 0, "", 0, "", 0, 0, 0, 0, "", "")
       }
-    }).filter(r => r.time >= startTs && r.time <= endTs).persist()
+    }).filter(r => r.time >= startTs && r.time <= endTs && filterExec(r,poolNameFilter,filterOfKey)).persist()
   }
   def string2Int(s: String, default: Int=0):Int = {
     try {

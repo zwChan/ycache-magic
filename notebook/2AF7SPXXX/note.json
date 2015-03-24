@@ -1551,7 +1551,7 @@
           "groups": [],
           "scatter": {}
         },
-        "editorHide": false
+        "editorHide": true
       },
       "settings": {
         "params": {},
@@ -1697,7 +1697,7 @@
             }
           }
         },
-        "editorHide": false,
+        "editorHide": true,
         "tableHide": false
       },
       "settings": {
@@ -1763,7 +1763,19 @@
       "progressUpdateIntervalMs": 500
     },
     {
-      "config": {},
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorHide": true
+      },
       "settings": {
         "params": {},
         "forms": {}
@@ -1778,7 +1790,7 @@
   "name": "Cache Magic",
   "id": "2AF7SPXXX",
   "config": {
-    "looknfeel": "default"
+    "looknfeel": "report"
   },
   "info": {}
 }

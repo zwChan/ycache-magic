@@ -523,11 +523,11 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
       isCreateTable = true
 
 
-    import sqlContext.createSchemaRDD
-    tableRdd.registerTempTable(tableName)
+    import sqlContext.implicits._
+    tableRdd.toDF.registerTempTable(tableName)
     println("####################")
     println("Table name is :" + tableName + "\nschema is:")
-    tableRdd.printSchema()
+    tableRdd.toDF.printSchema()
     println("####################")
   }
 
@@ -549,7 +549,7 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
     //fill the result to buff
     result.foreach(row=>{
       buff += "\n"
-      row.foreach(item =>buff += s"${item}\t")
+      row.toSeq.foreach(item =>buff += s"${item}\t")
       buff = buff.substring(0,buff.length-1)
     })
     println(buff)
@@ -605,19 +605,16 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
    * @param filterOfKey
    */
   def writeHbase(tableName: String, poolName: String="all", filterOfKey: String="all"): Unit = {
-    val targetRdd = tableRdd.filter(tbl => {
-      tbl.command.startsWith("VALUE") &&
-        filterExec(tbl,poolName,filterOfKey)
-    })
+    import sqlContext.implicits._
+    val targetRdd = tableRdd.filter(tbl => {filterExec(tbl,poolName,filterOfKey)})
     val counter = targetRdd.count()
     println(s"number of items is ${counter}")
     if (counter == 0)
       return
 
-    import sqlContext.createSchemaRDD
     println("schema *****:")
-    targetRdd.schema.fields.foreach(k => println(k.name))
-    val filedName = targetRdd.schema.fields.map(_.name)
+    targetRdd.toDF.schema.fields.foreach(k => println(k.name))
+    val filedName = targetRdd.toDF.schema.fields.map(_.name)
 
     targetRdd.foreachPartition(patition => {
       val hConf = HBaseConfiguration.create()
@@ -641,7 +638,7 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
 
       val hTable = new HTable(hConf, tableName)
       patition.foreach(t => {
-        val tSeq = t.toSeq()
+        val tSeq = t.toSeq
         val thePut = new Put(Bytes.toBytes(t.time.toString))
         filedName.zipWithIndex.foreach(kv =>
           thePut.add(Bytes.toBytes(kv._1), Bytes.toBytes(kv._1), Bytes.toBytes(tSeq(kv._2).toString))

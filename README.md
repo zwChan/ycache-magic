@@ -19,6 +19,7 @@ Analyze the behavior pattern of memcached for YHD.com.
 ##What is ycache-magic interested in?
   For now, ycache-magic interested in the following indications of memcached, and you can specify several
   filters to get the detail indications that you care, e.g. time range, poolName, what kind of keys.
+
    - Basic statistic. Counter of Gets, Set,..., commands; Hits, hit-rate, fails and so on. I don't want to
      do much for the basic statistic, since there is a lot of tools work pretty well.
    - Show the count of values distribution based on the length of the cache-value. All and Unique(of values)
@@ -56,9 +57,11 @@ Analyze the behavior pattern of memcached for YHD.com.
     of "Cache Magic"
   - [Option]Specify the poolInfo. The pool info is specify by a file in hdfs. Each line of the file indicates
     the pool that server or client IP/Port belong to. e.g.
-    poolname1 ip1:port1,ip2:port2,ip3:port3,…,
-    poolname2 ip1:port1,ip2:port2,ip3:port3,…,
-    It will search the server [IP:Port+","] first, then search the client [IP+":"].
+    > - poolname1 ip1:port1,ip2:port2,ip3:port3,…,
+    > - poolname2 ip1:port1,ip2:port2,ip3:port3,…,
+  - It will search the server [IP:Port+","] first, then search the client [IP+":"]. It don't care the port of client.
 
 ## Contributor
   Anyone interested in the project is welcome!
+
+  

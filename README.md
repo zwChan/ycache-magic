@@ -57,10 +57,8 @@ Analyze the behavior pattern of memcached for YHD.com.
     of "Cache Magic"
   - [Option]Specify the poolInfo. The pool info is specify by a file in hdfs. Each line of the file indicates
     the pool that server or client IP/Port belong to. e.g.
-    ```
-    >  poolname1 ip1:port1,ip2:port2,ip3:port3,…,
-    >  poolname2 ip1:port1,ip2:port2,ip3:port3,…,
-    ```
+  >  poolname1 ip1:port1,ip2:port2,ip3:port3,…,
+  >  poolname2 ip1:port1,ip2:port2,ip3:port3,…,
   - It will search the server [IP:Port+","] first, then search the client [IP+":"]. It don't care the port of client.
 
 ## Contributor

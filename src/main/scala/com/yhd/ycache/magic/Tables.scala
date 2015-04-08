@@ -20,22 +20,18 @@ case class Table(time: Double,
                     result: String
                    ) {
 
-  def isUpdate: Boolean =  isSet || isAdd || isIncr || isDecr || isCas
+  def isUpdate: Boolean =  isSet || isAdd || isIncr || isDecr || isCas || isReplace
   def isGet: Boolean =  command.startsWith("get") || command.startsWith("gets")
   def isSet: Boolean =  command.startsWith("set")
   def isAdd: Boolean =  command.startsWith("add")
+  def isReplace: Boolean =  command.startsWith("replace")
+  def isCas: Boolean =  command.startsWith("cas")
   def isDelete: Boolean =  command.startsWith("delete")
   def isIncr: Boolean =  command.startsWith("incr")
   def isDecr: Boolean =  command.startsWith("decr")
   def isTouch: Boolean =  command.startsWith("touch")
   def isStats: Boolean =  command.startsWith("stats")
-  def isCas: Boolean =  command.startsWith("cas")
-  def isWithValue: Boolean = (isSet && len > 0) || isAdd || (isGet && len>0)
-
-
-
-
-
+  def isWithValue: Boolean = len > 0
 
   def toSeq() = (time::poolName::serverIp::serverPort::clientIp::clientPort::command::flag::expire::len::value::key::result::Nil).toSeq
 }

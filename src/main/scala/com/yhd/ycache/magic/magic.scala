@@ -36,7 +36,8 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
   def POS_DST  = 1
   def POS_SRC  = 2
   def POS_TYPE = 3
-  def POS_MIN = 11
+  def POS_CHECKSUM = 11
+  def POS_MIN = 12
 
   // precision of time when out put as X-axis
   var precision = 1
@@ -89,8 +90,8 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
       def getPort(ipPort: String): Int = string2Int(ipPort.split(":")(1))
       def getKey(tokens: Array[String]): String = {
         tokens(POS_TYPE) match {
-          case "get" | "GET" => tokens(POS_GET_KEY)
-          case "set" | "SET" | "add" | "ADD" => tokens(POS_SET_KEY)
+          case "get" | "GET" | "gets"  => tokens(POS_GET_KEY)
+          case "set" | "SET" | "add" | "ADD"|"replace"|"append" | "prepend"|"cas" => tokens(POS_SET_KEY)
           case "delete" | "DELETE" => tokens(POS_GET_KEY)
           case "incr" | "decr" | "touch" => tokens(POS_GET_KEY)
           case _ => ""
@@ -98,27 +99,37 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
       }
       def getFlag(tokens: Array[String]): Long = {
         tokens(POS_TYPE) match {
-          case "get" | "GET" => string2Int(tokens(POS_GET_FLG))
-          case "set" | "SET" | "add" | "ADD" => string2Long(tokens(POS_SET_FLG))
+          case "get" | "GET" | "gets"  => string2Int(tokens(POS_GET_FLG))
+          case "set" | "SET" | "add" | "ADD"|"replace"|"append" | "prepend"|"cas" => string2Long(tokens(POS_SET_FLG))
           case _ => 0
         }
       }
       def getExpire(tokens: Array[String]): Long = {
         tokens(POS_TYPE) match {
-          case "set" | "SET" | "add" | "ADD" => string2Long(tokens(POS_SET_EXP))
+          case "set" | "SET" | "add" | "ADD"|"replace"|"append" | "prepend"|"cas" => string2Long(tokens(POS_SET_EXP))
+          case _ => 0
+        }
+      }
+      def getLen(tokens: Array[String]):Int = {
+        tokens(POS_TYPE) match  {
+          case "get" | "GET" | "gets" => string2Int(tokens(POS_GET_LEN))
+          case "set" | "SET" | "add" | "ADD"|"replace"|"append" | "prepend"|"cas" => string2Int(tokens(POS_SET_LEN))
           case _ => 0
         }
       }
       def getResult(tokens: Array[String]): String = {
         tokens(POS_TYPE) match {
-          case "get" | "GET" => tokens(POS_GET_RET)
-          case "set" | "SET" | "add" | "ADD" => tokens(POS_SET_RET)
+          case "get" | "GET" | "gets" => tokens(POS_GET_RET)
+          case "set" | "SET" | "add" | "ADD"|"replace"|"append" | "prepend"|"cas" => tokens(POS_SET_RET)
           case "delete" | "DELETE" => tokens(POS_SET_RET)
           case "incr" | "decr" | "touch" => tokens(POS_SET_RET)
           case _ => ""
         }
       }
-
+      def getValueCheckSum(tokens: Array[String]): Long = {
+        //The checksum is -1 is no value available
+        string2Long(tokens(POS_CHECKSUM))
+      }
       if (tokens.length > POS_TYPE) {
         Table(Magic.truncateAt(tokens(0).toDouble, 6),
           getPoolName(tokens),
@@ -130,7 +141,7 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
           getFlag(tokens),
           getExpire(tokens),
           getLen(tokens),
-          new Random().nextInt(2),
+          getValueCheckSum(tokens),
           getKey(tokens),
           getResult(tokens)
         )
@@ -139,6 +150,7 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
       }
     }).filter(r => r.time >= startTs && r.time <= endTs && filterExec(r,poolNameFilter,filterOfKey)).persist()
   }
+
   def string2Int(s: String, default: Int=0):Int = {
     try {
       s.toInt
@@ -153,6 +165,7 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
       case e: Exception => println(s"string2Long error: ${s}"); default
     }
   }
+
   def strMatch(originString: String, filter: String): Boolean = {
     if (filter.length > 0 && filter != "all") {
       if (filter.startsWith("/") && filter.endsWith("/") && filter.length >= 2) {
@@ -164,11 +177,11 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
       true
     }
   }
+
   /*
     Normalize the filter.
     if format is  /***/, used as *** a regular expression
     else match as a substring
-    The output is regular expression
    */
   def filterExec(tbl: Table, poolNameFilter: String = "", filterOfKey: String = "", minLen: Int=0, maxLen: Int=4*1024*1024):Boolean = {
     var ret = true
@@ -263,7 +276,6 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
     buff += "\t deleteFails\t"+getDeletesFail(poolName, filterOfKey)
 
     println(buff)
-
   }
   /*
     2. Some  distribution of keys, values, and their propertys
@@ -555,19 +567,12 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
     println(buff)
   }
 
-  def getLen(tokens: Array[String]):Int = {
-    tokens(POS_TYPE) match  {
-      case "VALUE" => string2Int(tokens(POS_GET_LEN))
-      case "set" => string2Int(tokens(POS_SET_LEN))
-      case _ => 0
-    }
-  }
 
   /**
    *  5. Show the distribution of error on specified command.
    */
   def showErrorDistribution(poolName: String, filterOfKey: String, command: String="all", error: String="ERROR",start: Double, end: Double) = {
-    var buff = "%table Time\tErrorCount"
+    var buff = "%table Offset Time\tErrorCount"
     val errorData = tableRdd.filter(t =>
       strMatch(t.poolName,poolName) &&
       strMatch(t.key,filterOfKey) &&
@@ -578,7 +583,8 @@ class Magic(@transient sc: SparkContext, files: String, poolInfoPath:String="") 
       .reduceByKey(_+_)
       .sortByKey()
       .take(outputLimit)
-    errorData.foreach(item=>buff += s"\n${item._1}\t${item._2}")
+
+    errorData.foreach(item=>buff += s"\n${Magic.truncateAt(item._1 - start, precision)}\t${item._2}")
     println(buff)
   }
 
@@ -658,6 +664,7 @@ object Magic {
   def roundAt(p: Int)(n: Double): Double = { val s = math pow (10, p); (math round n * s) / s }
   def ceilAt(p: Int)(n: Double): Double = { val s = math pow (10, p); (math ceil  n * s) / s }
 
+  // for test
   def main(args: Array[String]) {
     if (args.length<1){
       println("Error, usage: dataFilename [poolInfoFileName] [filterOfKey] [poolName]")
